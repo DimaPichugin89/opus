@@ -243,6 +243,31 @@ def squeeze():
     return stereo(fade(onepole_lp(out, 6000), 2, 120), 0.5)
 
 
+def swish():
+    """A quick natural air swish for fast camera moves: band-passed noise, fast swell."""
+    dur = 0.32
+    t = t_axis(dur)
+    p = t / dur
+    freqs = 900 + 2200 * np.sin(np.pi * np.clip(p * 1.2, 0, 1))
+    band = svf_bandpass(rng.standard_normal(len(t)), freqs, q=0.9)
+    amp = np.sin(np.pi * p) ** 2.2
+    return pan(fade(band * amp, 2, 40), 0.25 + 0.5 * p)
+
+
+def svf_bandpass(x, freqs, q):
+    """State-variable band-pass with a per-sample centre frequency."""
+    low = band = 0.0
+    y = np.empty_like(x)
+    damp = 1.0 / q
+    for i, v in enumerate(x):
+        f = 2 * math.sin(math.pi * min(freqs[i], SR / 6) / SR)
+        low += f * band
+        high = v - low - damp * band
+        band += f * high
+        y[i] = band
+    return y
+
+
 # --- io ------------------------------------------------------------------------
 
 def write(name, data):
@@ -261,5 +286,5 @@ def write(name, data):
 if __name__ == "__main__":
     for old in OUT.glob("*.wav"):
         old.unlink()
-    for fn in (tap, pour, thud, clink, plop, chord, seeds, press, squeeze):
+    for fn in (tap, pour, thud, clink, plop, chord, seeds, press, squeeze, swish):
         write(fn.__name__, fn())

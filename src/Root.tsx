@@ -8,6 +8,7 @@ import {G4, G4_FRAMES} from './stories/general/G4';
 import {G5, G5_FRAMES} from './stories/general/G5';
 import {G6, G6_FRAMES} from './stories/general/G6';
 import {G7, G7_FRAMES} from './stories/general/G7';
+import {FxTest, FX_FRAMES} from './dev/FxTest';
 import {FPS, H, W} from './theme';
 
 loadFonts();
@@ -21,6 +22,7 @@ const STORIES = [
   {id: 'General05', component: G5, frames: G5_FRAMES},
   {id: 'General06', component: G6, frames: G6_FRAMES},
   {id: 'General07', component: G7, frames: G7_FRAMES},
+  {id: 'FxTest', component: FxTest, frames: FX_FRAMES},
 ];
 
 export const Root: React.FC = () => (

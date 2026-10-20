@@ -13,6 +13,7 @@ export const SFX = {
   chord: {file: 'sfx/chord.wav', seconds: 2.4, volume: 0.5}, // logo accent
   seeds: {file: 'sfx/seeds.wav', seconds: 1.6, volume: 0.3}, // seeds raining onto the table
   press: {file: 'sfx/press.wav', seconds: 2.6, volume: 0.2}, // screw press running
+  swish: {file: 'sfx/swish.wav', seconds: 0.32, volume: 0.3}, // fast camera move
   squeeze: {file: 'sfx/squeeze.wav', seconds: 1.3, volume: 0.42}, // press plates crush the seeds: rumble, crack, squish
 } as const;
 
