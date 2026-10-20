@@ -62,7 +62,9 @@ export const KineticText: React.FC<{
   top: number;
   out?: number; // frame at which the block leaves
   align?: 'center' | 'left';
-}> = ({lines, top, out, align = 'center'}) => {
+  left?: number;
+  width?: number;
+}> = ({lines, top, out, align = 'center', left = SAFE.side, width = W - SAFE.side * 2}) => {
   const frame = useCurrentFrame();
   const leave = out === undefined ? 0 : interpolate(frame, [out, out + 8], [0, 1], {
     extrapolateLeft: 'clamp',
@@ -74,8 +76,8 @@ export const KineticText: React.FC<{
       style={{
         position: 'absolute',
         top,
-        left: SAFE.side,
-        width: W - SAFE.side * 2,
+        left,
+        width,
         display: 'flex',
         flexDirection: 'column',
         alignItems: align === 'center' ? 'center' : 'flex-start',

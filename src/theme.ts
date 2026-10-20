@@ -16,6 +16,9 @@ export const COLORS = {
   inkSoft: '#6B5543',
   amber: '#C9821A',
   amberLight: '#F2B640',
+  steelLight: '#EEEEEB',
+  steel: '#C9CAC6',
+  steelDeep: '#9C9E99',
 };
 
 // Label colours, one per oil.
@@ -44,6 +47,9 @@ export const TYPE = {
   lead: {font: 'medium', size: 90, lineHeight: 1.04, tracking: -0.025},
   body: {font: 'regular', size: 90, lineHeight: 1.04, tracking: -0.02},
   cta: {font: 'medium', size: 60, lineHeight: 1.1, tracking: -0.01},
+  item: {font: 'medium', size: 80, lineHeight: 1.05, tracking: -0.02},
+  note: {font: 'regular', size: 56, lineHeight: 1.15, tracking: -0.01},
+  label: {font: 'regular', size: 46, lineHeight: 1.1, tracking: 0},
 } satisfies Record<string, TypeRole>;
 
 // Reading time: 0.3 s per word, never under 1.2 s per phrase.
