@@ -4,3 +4,4 @@ out/review/*
 !out/review/general_overview.png
 out/maslarada_general_all.mp4
 .remotion/
+!out/review/studio_cutouts_all.png

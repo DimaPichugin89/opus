@@ -33,7 +33,12 @@ def cut(src: Path, dst: Path):
             if cand.getpixel((x, y)) == 255:
                 ImageDraw.floodfill(cand, (x, y), 128)
     bg = np.asarray(cand) == 128
-    mask = Image.fromarray(((~bg) * 255).astype(np.uint8), "L")
+    keep = ~bg
+    keep[:4, :] = keep[-4:, :] = False  # photo borders sometimes carry a thin dark line
+    keep[:, :4] = keep[:, -4:] = False
+    mask = Image.fromarray((keep * 255).astype(np.uint8), "L")
+    # Opening removes hairlines and specks that survive the flood fill.
+    mask = mask.filter(ImageFilter.MinFilter(7)).filter(ImageFilter.MaxFilter(7))
     # Keep only the largest blob: drop specks and shadow islands.
     mask = mask.filter(ImageFilter.MedianFilter(5))
     mask = mask.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
