@@ -1,3 +1,4 @@
 node_modules/
-out/*.tmp
+out/frames/
+out/review/sheet_*.png
 .remotion/
