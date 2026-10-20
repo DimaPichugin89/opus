@@ -50,8 +50,9 @@ export const StudioBottle: React.FC<{
   shadow?: boolean;
   gloss?: boolean;
   glossAt?: number;
+  reflect?: boolean; // faint mirror image on a glossy tabletop
   style?: React.CSSProperties; // extra transform etc. applied around the base centre
-}> = ({oil, x, bottom, height, shadow = true, gloss = true, glossAt = 0, style}) => {
+}> = ({oil, x, bottom, height, shadow = true, gloss = true, glossAt = 0, reflect = false, style}) => {
   const s = STUDIO[oil];
   const w = bottleWidth(height);
   return (
@@ -66,6 +67,24 @@ export const StudioBottle: React.FC<{
             height: height * 0.06,
             borderRadius: '50%',
             background: 'radial-gradient(closest-side, rgba(38,23,13,0.35), rgba(38,23,13,0))',
+          }}
+        />
+      ) : null}
+      {reflect ? (
+        <Img
+          src={staticFile(s.src)}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: height,
+            width: '100%',
+            height: '100%',
+            transform: 'scaleY(-1)',
+            transformOrigin: '50% 0%',
+            opacity: 0.22,
+            WebkitMaskImage: 'linear-gradient(0deg, rgba(0,0,0,0) 72%, rgba(0,0,0,1) 100%)',
+            maskImage: 'linear-gradient(0deg, rgba(0,0,0,0) 72%, rgba(0,0,0,1) 100%)',
+            filter: 'blur(1.5px)',
           }}
         />
       ) : null}

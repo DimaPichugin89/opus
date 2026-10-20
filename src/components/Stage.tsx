@@ -14,7 +14,7 @@ const Grain: React.FC = () => {
         backgroundImage: `url(${staticFile('tex/grain.png')})`,
         backgroundPosition: `${x}px ${y}px`,
         mixBlendMode: 'overlay',
-        opacity: 0.16,
+        opacity: 0.08,
         pointerEvents: 'none',
         zIndex: 90,
       }}
@@ -25,7 +25,7 @@ const Grain: React.FC = () => {
 export const Stage: React.FC<{children: React.ReactNode}> = ({children}) => (
   <AbsoluteFill style={{background: COLORS.cream}}>
     {children}
-    <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(38,23,13,0.14) 100%)', zIndex: 89, pointerEvents: 'none'}} />
+    <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 62%, rgba(38,23,13,0.10) 100%)', zIndex: 89, pointerEvents: 'none'}} />
     <Grain />
   </AbsoluteFill>
 );

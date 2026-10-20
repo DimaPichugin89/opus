@@ -19,7 +19,7 @@ export const SFX = {
 } as const;
 
 // Global trim for the whole series.
-export const MASTER = 0.92;
+export const MASTER = 1.12;
 
 export type SfxName = keyof typeof SFX;
 

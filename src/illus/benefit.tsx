@@ -103,7 +103,7 @@ export const OmegaPlate: React.FC<{cx: number; cy: number; at?: number}> = ({cx,
   );
 };
 
-// Heart, vessel and brain icons light up one after another.
+// Heart, vessels, immune system and metabolism icons light up one after another.
 const Heart = () => <path d="M 0 40 C -70 -10 -60 -70 -20 -70 C 0 -70 0 -50 0 -46 C 0 -50 0 -70 20 -70 C 60 -70 70 -10 0 40 Z" />;
 // A branching vessel drawn as a tube: dark outline stroke with a lighter core.
 const VESSEL = 'M -60 50 C -20 30 0 0 0 -20 M 0 -20 C 0 -45 -30 -60 -60 -66 M 0 -20 C 10 -45 40 -55 66 -50';
@@ -113,30 +113,37 @@ const Vessel = () => (
     <path d={VESSEL} fill="none" stroke={COLORS.amberLight} strokeWidth={20} strokeLinecap="round" />
   </>
 );
-const Brain = () => (
-  <path d="M -10 -60 C -40 -70 -70 -50 -66 -20 C -86 -6 -80 30 -54 36 C -50 60 -16 64 -6 46 L -6 -56 Z M 10 -60 C 40 -70 70 -50 66 -20 C 86 -6 80 30 54 36 C 50 60 16 64 6 46 L 6 -56 Z" />
+const Shield = () => <path d="M 0 -72 L 60 -48 C 60 10 40 48 0 72 C -40 48 -60 10 -60 -48 Z" />;
+const Cycle = () => (
+  <>
+    <path d="M -50 -10 A 52 52 0 0 1 40 -38" fill="none" strokeWidth={14} strokeLinecap="round" />
+    <path d="M 50 10 A 52 52 0 0 1 -40 38" fill="none" strokeWidth={14} strokeLinecap="round" />
+    <path d="M 30 -60 L 50 -36 L 22 -26 Z M -30 60 L -50 36 L -22 26 Z" />
+  </>
 );
 
 export const Organs: React.FC<{cx: number; cy: number; at?: number}> = ({cx, cy, at = 0}) => {
   const t = useT(at);
   const items = [
     {Icon: Heart, label: 'сердце', at: 8},
-    {Icon: Vessel, label: 'сосуды', at: 22},
-    {Icon: Brain, label: 'мозг', at: 36},
+    {Icon: Vessel, label: 'сосуды', at: 20},
+    {Icon: Shield, label: 'иммунитет', at: 32},
+    {Icon: Cycle, label: 'обмен веществ', at: 44},
   ];
   return (
-    <Art cx={cx} cy={cy} w={960} h={600}>
+    <Art cx={cx} cy={cy} w={960} h={1000}>
       {items.map(({Icon, label, at: a}, k) => {
-        const x = 170 + k * 310;
+        const x = 250 + (k % 2) * 460;
+        const yOff = Math.floor(k / 2) * 440;
         const lit = ramp(t, a, a + 14, 0, 1);
         return (
           <g key={k}>
-            <circle cx={x} cy={260} r={130} fill={COLORS.creamDeep} />
-            <circle cx={x} cy={260} r={130} fill={COLORS.amberLight} opacity={0.5 * lit} />
-            <g transform={`translate(${x} 270) scale(${1.1 + 0.1 * lit})`} fill={lit > 0.5 ? COLORS.amber : 'none'} stroke={INK} strokeWidth={LINE} strokeLinejoin="round">
+            <circle cx={x} cy={200 + yOff} r={130} fill={COLORS.creamDeep} />
+            <circle cx={x} cy={200 + yOff} r={130} fill={COLORS.amberLight} opacity={0.5 * lit} />
+            <g transform={`translate(${x} ${210 + yOff}) scale(${1.1 + 0.1 * lit})`} fill={lit > 0.5 ? COLORS.amber : 'none'} stroke={INK} strokeWidth={LINE} strokeLinejoin="round">
               <Icon />
             </g>
-            <text x={x} y={470} textAnchor="middle" fontFamily="MasRegular" fontSize={48} fill={COLORS.inkSoft}>
+            <text x={x} y={410 + yOff} textAnchor="middle" fontFamily="MasRegular" fontSize={48} fill={COLORS.inkSoft}>
               {label}
             </text>
           </g>

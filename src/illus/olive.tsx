@@ -68,11 +68,11 @@ export const OliveArt: React.FC<{cx: number; cy: number; at?: number}> = ({cx, c
 };
 
 // Two measuring cylinders: share of omega-3 in olive oil vs flax oil.
-export const OmegaJars: React.FC<{cx: number; cy: number; at?: number}> = ({cx, cy, at = 0}) => {
+export const OmegaJars: React.FC<{cx: number; cy: number; at?: number; labels?: [string[], string[]]}> = ({cx, cy, at = 0, labels = [['оливковое'], ['льняное']]}) => {
   const t = useT(at);
   const jars = [
-    {x: 270, pct: 1, label: 'оливковое', color: OLIVE_OIL, at: 6, sign: '<'},
-    {x: 630, pct: 55, label: 'льняное', color: COLORS.amberLight, at: 22, sign: '≈'},
+    {x: 270, pct: 1, color: OLIVE_OIL, at: 6, sign: '<'},
+    {x: 630, pct: 55, color: COLORS.amberLight, at: 22, sign: '≈'},
   ];
   const H = 520;
   const top = 160;
@@ -100,9 +100,11 @@ export const OmegaJars: React.FC<{cx: number; cy: number; at?: number}> = ({cx, 
               <text x={j.x} y={top - 40} textAnchor="middle" fontFamily="MasMedium" fontSize={92} fill={INK} opacity={p > 0 ? 1 : 0}>
                 {j.sign} {Math.max(j.sign === '<' ? 1 : 0, Math.round(j.pct * p))}%
               </text>
-              <text x={j.x} y={top + H + 70} textAnchor="middle" fontFamily="MasRegular" fontSize={48} fill={COLORS.inkSoft}>
-                {j.label}
-              </text>
+              {labels[k].map((line, i) => (
+                <text key={i} x={j.x} y={top + H + 66 + i * 54} textAnchor="middle" fontFamily="MasRegular" fontSize={46} fill={COLORS.inkSoft}>
+                  {line}
+                </text>
+              ))}
             </g>
           );
         })}

@@ -48,6 +48,7 @@ export const TYPE = {
   lead: {font: 'medium', size: 84, lineHeight: 1.06, tracking: -0.025},
   body: {font: 'regular', size: 90, lineHeight: 1.04, tracking: -0.02},
   sub: {font: 'regular', size: 56, lineHeight: 1.18, tracking: -0.01},
+  para: {font: 'medium', size: 72, lineHeight: 1.12, tracking: -0.02}, // connected sentences, up to ~23 chars a line
   cta: {font: 'medium', size: 60, lineHeight: 1.1, tracking: -0.01},
   item: {font: 'medium', size: 80, lineHeight: 1.05, tracking: -0.02},
   note: {font: 'regular', size: 56, lineHeight: 1.15, tracking: -0.01},

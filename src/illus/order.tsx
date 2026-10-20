@@ -65,11 +65,11 @@ export const ShipIn2Days: React.FC<{cx: number; cy: number; at?: number}> = ({cx
           <rect x={560} y={260} width={280} height={300} rx={36} fill="#FFFFFF" stroke={INK} strokeWidth={LINE} />
           <rect x={560} y={260} width={280} height={70} rx={36} fill={OIL.sun} />
           <rect x={560} y={296} width={280} height={34} fill={OIL.sun} />
-          <text x={700} y={490} textAnchor="middle" fontFamily="MasMedium" fontSize={150} fill={INK}>
-            2
+          <text x={700} y={490} textAnchor="middle" fontFamily="MasMedium" fontSize={140} fill={INK}>
+            48
           </text>
           <text x={700} y={620} textAnchor="middle" fontFamily="MasRegular" fontSize={48} fill={COLORS.inkSoft}>
-            дня
+            часов
           </text>
         </g>
       </Art>

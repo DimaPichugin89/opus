@@ -1,5 +1,5 @@
 // The full reel: one continuous film built from scenes joined by varied transitions.
-// Copy follows docs/scenario_reel.md (facts from docs/factbase.md).
+// Copy follows docs/scenario_reel.md. Every phrase gets about 0.5 s per word on screen.
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, Sequence, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {linearTiming, TransitionSeries} from '@remotion/transitions';
@@ -7,23 +7,29 @@ import {KineticText, TextLine} from '../../components/KineticText';
 import {LogoPlate} from '../../components/LogoPlate';
 import {SeedDrift, SeedRain} from '../../components/Seeds';
 import {Stage} from '../../components/Stage';
+import {HeroBg, StudioBg} from '../../components/StudioBg';
 import {BottleHero, StudioBottle} from '../../components/StudioBottle';
 import {bottleMask, card, flood, liquid, press, splash, whip, zoomThrough, Fx} from '../../fx/presentations';
-import {OmegaPlate, VitaminE} from '../../illus/benefit';
+import {OmegaPlate, Organs, VitaminE} from '../../illus/benefit';
 import {Grow, TimeScale} from '../../illus/kit';
 import {OmegaJars} from '../../illus/olive';
 import {OrderToPress, ShipIn2Days} from '../../illus/order';
 import {PressCutaway} from '../../illus/press';
-import {BleachFlasks, CompareBottles, HeatTray, ShelfBottleArt, SolventPour, SteamTank} from '../../illus/shelf';
-import {NoFrying, ReadyDishes, SpoonFill} from '../../illus/usage';
+import {BleachFlasks, HeatTray, ShelfBottleArt, SteamTank} from '../../illus/shelf';
+import {ReadyDishes, SpoonFill} from '../../illus/usage';
 import {Sfx} from '../../sfx';
 import {COLORS, OIL, Oil} from '../../theme';
 
-const lead = (text: string, at: number, sound = false, color?: string): TextLine => ({text, at, role: 'lead', sound, color});
-const sub = (text: string, at: number, color: string = COLORS.inkSoft): TextLine => ({text, at, role: 'sub', color, sound: false});
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
-// Quick internal beats inside a scene: each slide pushes in from the side and out the other way.
+// A phrase split over lines: the first line taps, words rise one after another.
+const phrase = (lines: string[], at: number, color?: string): TextLine[] =>
+  lines.map((text, i) => ({text, at: at + i * 6, role: 'para', color, sound: i === 0, stagger: 2}));
+const Text: React.FC<{lines: string[]; at: number; top?: number; out?: number; color?: string}> = ({lines, at, top = 290, out, color}) => (
+  <KineticText top={top} out={out} lines={phrase(lines, at, color)} />
+);
+
+// Quick internal beats inside a scene: each beat pushes in from the side and leaves the other way.
 const Beat: React.FC<{from: number; dur: number; children: React.ReactNode; last?: boolean}> = ({from, dur, children, last}) => (
   <Sequence from={from} durationInFrames={dur}>
     <BeatMotion dur={dur} last={last}>
@@ -33,208 +39,244 @@ const Beat: React.FC<{from: number; dur: number; children: React.ReactNode; last
 );
 const BeatMotion: React.FC<{dur: number; last?: boolean; children: React.ReactNode}> = ({dur, last, children}) => {
   const f = useCurrentFrame();
-  const inP = interpolate(f, [0, 9], [1, 0], {...clamp, easing: Easing.out(Easing.cubic)});
+  const inP = interpolate(f, [0, 10], [1, 0], {...clamp, easing: Easing.out(Easing.cubic)});
   const outP = last ? 0 : interpolate(f, [dur - 8, dur], [0, 1], {...clamp, easing: Easing.in(Easing.cubic)});
-  return <AbsoluteFill style={{transform: `translateX(${inP * 260 - outP * 260}px)`, opacity: 1 - Math.max(inP, outP)}}>{children}</AbsoluteFill>;
+  return <AbsoluteFill style={{transform: `translateX(${inP * 220 - outP * 220}px)`, opacity: 1 - Math.max(inP, outP)}}>{children}</AbsoluteFill>;
 };
 
-const Bg: React.FC<{color: string; glow?: string}> = ({color, glow}) => (
-  <AbsoluteFill style={{background: glow ? `radial-gradient(ellipse at 50% 55%, ${glow} 0%, ${color} 70%)` : color}} />
-);
-
-// 1. Hook
-const Hook: React.FC = () => (
+// Close-up of a real bottle on a dark backdrop in its label colour.
+const HeroShot: React.FC<{oil: Oil; dur: number; lines: string[]; at?: number; focus: [number, number]; scale: [number, number]; tilt?: [number, number]; x?: [number, number]}> = ({oil, dur, lines, at = 10, focus, scale, tilt, x}) => (
   <AbsoluteFill>
-    <Bg color={COLORS.cream} />
-    <SeedDrift count={22} seed="r1b" kinds={['sunflower', 'flax', 'sesame', 'hemp']} size={[16, 30]} speed={6} opacity={0.6} />
-    <SeedRain count={60} seed="r1f" kinds={['sunflower', 'sunflower', 'sunflower', 'pumpkin', 'flax', 'sesame', 'hemp']} floor={[1330, 1760]} spread={30} />
-    <Sfx name="seeds" at={2} gain={0.8} />
-    <KineticText top={740} lines={[lead('Почему масло с полки', 6, true), lead('ничем не пахнет?', 12)]} />
+    <HeroBg color={OIL[oil]} seed={oil} />
+    <BottleHero oil={oil} dur={dur} focus={focus} scale={scale} tilt={tilt} x={x} />
+    <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(16,10,5,0.82) 0%, rgba(16,10,5,0.45) 36%, rgba(16,10,5,0) 52%)'}} />
+    <Text lines={lines} at={at} color={COLORS.cream} />
   </AbsoluteFill>
 );
 
-// 2. What it is: seeds and pressure only, under 30 °C
+// 1. Hook: what is cold-pressed oil good for?
+const Hook: React.FC = () => (
+  <AbsoluteFill>
+    <StudioBg floor={1420} />
+    <SeedDrift count={18} seed="h1" kinds={['sunflower', 'flax', 'sesame', 'hemp']} size={[16, 30]} speed={5} opacity={0.5} />
+    <SeedRain count={64} seed="h2" kinds={['sunflower', 'sunflower', 'pumpkin', 'flax', 'sesame', 'hemp']} floor={[1440, 1780]} spread={34} />
+    <Sfx name="seeds" at={2} gain={0.8} />
+    <KineticText top={700} lines={[{text: 'Чем полезно', at: 8, role: 'lead'}, {text: 'сыродавленное масло?', at: 14, role: 'lead', sound: false}]} />
+  </AbsoluteFill>
+);
+
+// 2. What it is
 const WhatItIs: React.FC = () => (
   <AbsoluteFill>
-    <Bg color={COLORS.cream} />
-    <KineticText top={290} lines={[lead('Сыродавленное:', 12, true), lead('только семена и давление', 17), sub('не выше 30 °C', 44)]} />
-    <TimeScale k={1.8}>
-      <PressCutaway cx={540} cy={1110} at={0} scale={1.1} />
+    <StudioBg />
+    <Text lines={['Сыродавленное масло', 'получают прессованием', 'семян без нагрева,', 'не выше 30 °C']} at={12} />
+    <TimeScale k={1.3}>
+      <PressCutaway cx={540} cy={1180} at={0} scale={1.0} />
     </TimeScale>
   </AbsoluteFill>
 );
 
-// 3. Close-up of the real bottle
-const HeroShot: React.FC<{oil: Oil; dur: number; lines: TextLine[]; focus: [number, number]; scale: [number, number]; tilt?: [number, number]; x?: [number, number]; textTop?: number}> = ({oil, dur, lines, focus, scale, tilt, x, textTop = 290}) => (
+// 3. Raw material
+const RawMaterial: React.FC = () => (
   <AbsoluteFill>
-    <Bg color={darken(OIL[oil])} glow={OIL[oil]} />
-    <BottleHero oil={oil} dur={dur} focus={focus} scale={scale} tilt={tilt} x={x} />
-    <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(20,12,6,0.7) 0%, rgba(20,12,6,0) 38%)'}} />
-    <KineticText top={textTop} lines={lines} />
+    <StudioBg floor={1380} light={[50, 55]} />
+    <SeedDrift count={26} seed="raw" kinds={['sunflower', 'sunflower', 'flax', 'pumpkin']} size={[24, 60]} speed={2.5} area={[0, 560, 1080, 1700]} />
+    <StudioBottle oil="sun" x={540} bottom={1400} height={820} reflect glossAt={20} />
+    <Text lines={['Масларада делает масло', 'только из первоклассного', 'сырья']} at={10} />
   </AbsoluteFill>
 );
-const darken = (hex: string) => {
-  const n = parseInt(hex.slice(1), 16);
-  const c = (v: number) => Math.round(v * 0.35).toString(16).padStart(2, '0');
-  return `#${c(n >> 16)}${c((n >> 8) & 255)}${c(n & 255)}`;
-};
 
-// 4. How refined oil is made, in quick beats
-const STEP = 46;
-const Refined: React.FC = () => {
-  const steps: [string[], React.ReactNode][] = [
-    [['Семена прогревают'], <HeatTray key="h" cx={540} cy={1100} at={0} />],
-    [['Остатки вымывают', 'специальной жидкостью'], <SolventPour key="s" cx={540} cy={1140} at={0} />],
-    [['Осветляют глиной'], <BleachFlasks key="b" cx={540} cy={1080} at={0} />],
-    [['Запах убирают паром,', '200+ °C'], <SteamTank key="t" cx={540} cy={1150} at={0} />],
-  ];
+// 4. Oil from shop shelves, step by step
+const SHELF_STEPS: {lines: string[]; dur: number; art: React.ReactNode; cy: number}[] = [
+  {lines: ['Семена прогревают,', 'чтобы выжать', 'больше масла'], dur: 84, art: <HeatTray cx={540} cy={1120} at={0} />, cy: 1120},
+  {lines: ['Затем масло очищают', 'и осветляют'], dur: 72, art: <BleachFlasks cx={540} cy={1100} at={0} />, cy: 1100},
+  {lines: ['Запах убирают', 'горячим паром', 'при 200 °C и выше'], dur: 90, art: <SteamTank cx={540} cy={1160} at={0} />, cy: 1160},
+];
+const SHELF_INTRO = 96;
+const SHELF_RESULT = 120;
+const SHELF_DUR = SHELF_INTRO + SHELF_STEPS.reduce((s, x) => s + x.dur, 0) + SHELF_RESULT;
+const Shelf: React.FC = () => {
+  let t = SHELF_INTRO;
   return (
     <AbsoluteFill>
-      <Bg color={COLORS.cream} />
-      <Beat from={0} dur={52}>
-        <KineticText top={290} lines={[lead('А рафинированное', 8, true), lead('делают иначе', 13)]} />
-        <Grow cy={1110}>
-          <ShelfBottleArt cx={540} cy={1110} at={0} />
+      <StudioBg />
+      <Beat from={0} dur={SHELF_INTRO}>
+        <Text lines={['А масло с полок', 'магазинов часто', 'делают иначе']} at={10} />
+        <Grow cy={1150}>
+          <ShelfBottleArt cx={540} cy={1150} at={0} />
         </Grow>
       </Beat>
-      {steps.map(([text, art], i) => (
-        <Beat key={i} from={52 + i * STEP} dur={STEP}>
-          <KineticText top={290} lines={[{text: `${i + 1} / 4`, at: 2, role: 'sub', color: COLORS.amber}, ...text.map((t, k) => lead(t, 4 + k * 4, k === 0))]} />
-          <Grow cy={1120} s={1.15}>
-            <TimeScale k={2.2}>{art}</TimeScale>
-          </Grow>
-        </Beat>
-      ))}
-      <Beat from={52 + 4 * STEP} dur={300 - 52 - 4 * STEP} last>
-        <KineticText top={290} lines={[lead('Без вкуса и запаха', 6, true), sub('часть витамина E теряется', 22)]} />
-        <Grow cy={1130}>
-          <TimeScale k={1.5}>
-            <CompareBottles cx={540} cy={1130} at={0} />
-          </TimeScale>
+      {SHELF_STEPS.map((s, i) => {
+        const from = t;
+        t += s.dur;
+        return (
+          <Beat key={i} from={from} dur={s.dur}>
+            <KineticText top={290} lines={[{text: `${i + 1} / 3`, at: 2, role: 'sub', color: COLORS.amber, sound: false}, ...phrase(s.lines, 6)]} />
+            <Grow cy={s.cy} s={1.12}>
+              <TimeScale k={1.4}>{s.art}</TimeScale>
+            </Grow>
+          </Beat>
+        );
+      })}
+      <Beat from={t} dur={SHELF_RESULT} last>
+        <StudioBg floor={1500} />
+        <Text lines={['Так масло теряет', 'природный вкус, запах', 'и часть витамина E']} at={8} />
+        <Grow cy={1160}>
+          <ShelfBottleArt cx={330} cy={1160} at={0} />
         </Grow>
+        <StudioBottle oil="sun" x={720} bottom={1520} height={760} reflect glossAt={20} />
+        <div style={{position: 'absolute', left: 150, width: 360, top: 1560, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 40, color: COLORS.inkSoft}}>с полки магазина</div>
+        <div style={{position: 'absolute', left: 540, width: 360, top: 1560, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 40, color: COLORS.inkSoft}}>сыродавленное</div>
       </Beat>
     </AbsoluteFill>
   );
 };
 
-// 5. Olive oil, honestly
-const Olive: React.FC = () => (
+// 5. Taste and aroma
+const Taste: React.FC = () => (
+  <HeroShot oil="sesame" dur={180} focus={[0.38, 0.52]} scale={[1.9, 1.55]} tilt={[-2, 2]} lines={['Сыродавленное масло', 'пахнет семенами,', 'из которых его сделали,', 'и имеет мягкий', 'естественный вкус']} />
+);
+
+// 6. Omega-3 compared
+const Omega: React.FC = () => (
   <AbsoluteFill>
-    <Bg color={COLORS.cream} />
-    <KineticText top={290} out={52} lines={[lead('Extra Virgin тоже', 10, true), lead('получают механически', 15)]} />
-    <KineticText top={290} lines={[lead('Омега-3: меньше 1 %', 60, true), sub('в льняном больше половины', 78)]} />
-    <Grow cy={1150} s={1.1}>
-      <TimeScale k={1.4}>
-        <OmegaJars cx={540} cy={1150} at={14} />
+    <StudioBg />
+    <Text lines={['В подсолнечном', 'и оливковом масле', 'с полок магазинов', 'омега-3 меньше 1 %']} at={10} out={150} />
+    <Text lines={['А в сыродавленном', 'льняном омега-3', 'больше половины', 'всего состава']} at={162} />
+    <Grow cy={1220} s={1.0}>
+      <TimeScale k={0.9}>
+        <OmegaJars cx={540} cy={1220} at={30} labels={[['с полок', 'магазинов'], ['сыродавленное', 'льняное']]} />
       </TimeScale>
     </Grow>
   </AbsoluteFill>
 );
 
-// 6. Benefits
-const Benefits: React.FC = () => (
+// 7. Vitamin E, explained
+const VitE: React.FC = () => (
   <AbsoluteFill>
-    <Bg color={COLORS.cream} />
-    <Beat from={0} dur={66}>
-      <KineticText top={290} lines={[lead('Витамин E помогает', 12, true), lead('защищать клетки', 17)]} />
-      <TimeScale k={1.5}>
-        <VitaminE cx={540} cy={1120} at={4} />
+    <StudioBg />
+    <Beat from={0} dur={170}>
+      <Text lines={['В одной ложке', 'сыродавленного', 'подсолнечного масла', 'больше трети дневной', 'нормы витамина E']} at={10} />
+      <Grow cy={1180}>
+        <TimeScale k={1.2}>
+          <SpoonFill cx={540} cy={1180} at={0} />
+        </TimeScale>
+      </Grow>
+      <Fraction at={60} />
+    </Beat>
+    <Beat from={170} dur={100} last>
+      <Text lines={['Витамин E помогает', 'защищать клетки', 'организма']} at={6} />
+      <TimeScale k={1.3}>
+        <VitaminE cx={540} cy={1160} at={0} />
       </TimeScale>
-    </Beat>
-    <Beat from={66} dur={64}>
-      <KineticText top={290} lines={[lead('Ложка подсолнечного:', 6, true), lead('больше трети нормы', 11)]} />
-      <Grow cy={1080}>
-        <TimeScale k={1.6}>
-          <SpoonFill cx={540} cy={1080} at={0} />
-        </TimeScale>
-      </Grow>
-      <BigFraction at={30} />
-    </Beat>
-    <Beat from={130} dur={65} last>
-      <KineticText top={290} lines={[lead('Омега-3 и омега-6', 6, true), sub('организм сам не делает,', 18), sub('они приходят только с едой', 22)]} />
-      <Grow cy={1160} s={1.05}>
-        <TimeScale k={1.6}>
-          <OmegaPlate cx={540} cy={1160} at={0} />
-        </TimeScale>
-      </Grow>
     </Beat>
   </AbsoluteFill>
 );
-const BigFraction: React.FC<{at: number}> = ({at}) => {
+const Fraction: React.FC<{at: number}> = ({at}) => {
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
   const s = spring({frame: f - at, fps, config: {damping: 12, stiffness: 160}});
   return (
     <>
-      <div style={{position: 'absolute', left: 0, right: 0, top: 1380, textAlign: 'center', fontFamily: 'MasMedium', fontSize: 170, color: COLORS.amber, transform: `scale(${s})`}}>&gt; 1/3</div>
+      <div style={{position: 'absolute', left: 0, right: 0, top: 1420, textAlign: 'center', fontFamily: 'MasMedium', fontSize: 150, color: COLORS.amber, transform: `scale(${s})`}}>&gt; 1/3 нормы</div>
       <Sfx name="clink" at={at} />
     </>
   );
 };
 
-// 7. Where to use it
-const Uses: React.FC = () => (
+// 8. Health support
+const Health: React.FC = () => (
   <AbsoluteFill>
-    <Bg color={COLORS.cream} />
-    <Sequence from={0} durationInFrames={245} layout="none">
-      <Grow cy={1150} s={1.22}>
-        <TimeScale k={1.2}>
-          <ReadyDishes cx={540} cy={1150} at={10} />
+    <StudioBg />
+    <Beat from={0} dur={110}>
+      <Text lines={['Омега-3 и омега-6', 'организм', 'не вырабатывает сам']} at={10} />
+      <Grow cy={1200} s={1.05}>
+        <TimeScale k={1.3}>
+          <OmegaPlate cx={540} cy={1200} at={0} />
         </TimeScale>
       </Grow>
-    </Sequence>
-    <Beat from={0} dur={56}>
-      <KineticText top={290} lines={[lead('Только в готовое блюдо', 10, true)]} />
     </Beat>
-    <Beat from={56} dur={50}>
-      <KineticText top={290} lines={[lead('Салат, винегрет,', 4, true), lead('квашеная капуста', 8)]} />
-    </Beat>
-    <Beat from={106} dur={50}>
-      <KineticText top={290} lines={[lead('Каша, творог,', 4, true), lead('картошка', 8)]} />
-    </Beat>
-    <Beat from={156} dur={50}>
-      <KineticText top={290} lines={[lead('Суп в тарелке,', 4, true), lead('соус, хлеб', 8)]} />
-    </Beat>
-    <Beat from={206} dur={40}>
-      <KineticText top={290} lines={[lead('1–2 ложки в день', 4, true)]} />
-    </Beat>
-    <Beat from={246} dur={54} last>
-      <Bg color={COLORS.cream} />
-      <KineticText top={290} lines={[lead('На нём не жарят', 4, true)]} />
-      <TimeScale k={1.8}>
-        <NoFrying cx={540} cy={1100} at={0} />
-      </TimeScale>
+    <Beat from={110} dur={180} last>
+      <Text lines={['Сыродавленные масла', 'способствуют работе', 'сердца, сосудов,', 'иммунной системы', 'и обмену веществ']} at={6} />
+      <Grow cy={1240} s={0.95}>
+        <Organs cx={540} cy={1240} at={30} />
+      </Grow>
     </Beat>
   </AbsoluteFill>
 );
 
-// 8. Freshness and delivery
+// 9. How to use
+const Use: React.FC = () => (
+  <AbsoluteFill>
+    <StudioBg />
+    <Beat from={0} dur={120}>
+      <Text lines={['Его добавляют', 'в готовые блюда', 'и не нагревают']} at={10} />
+      <Grow cy={1180} s={1.2}>
+        <TimeScale k={0.9}>
+          <ReadyDishes cx={540} cy={1180} at={10} />
+        </TimeScale>
+      </Grow>
+    </Beat>
+    <Beat from={120} dur={100} last>
+      <Text lines={['Достаточно', '1–2 ложек в день']} at={6} />
+      <Grow cy={1140}>
+        <TimeScale k={1.3}>
+          <SpoonFill cx={540} cy={1140} at={0} />
+        </TimeScale>
+      </Grow>
+    </Beat>
+  </AbsoluteFill>
+);
+
+// 10. Why pressed to order, delivery, date
 const Fresh: React.FC = () => (
   <AbsoluteFill>
-    <Bg color={COLORS.cream} />
-    <Beat from={0} dur={76}>
-      <KineticText top={290} lines={[lead('Отжим только', 10, true), lead('после заказа', 15)]} />
-      <Grow cy={1100}>
-        <TimeScale k={1.6}>
-          <OrderToPress cx={540} cy={1100} at={0} />
+    <StudioBg />
+    <Beat from={0} dur={90}>
+      <Text lines={['Почему отжим', 'только под заказ?']} at={10} top={760} />
+    </Beat>
+    <Beat from={90} dur={175}>
+      <Text lines={['Масло не лежит', 'на складе, не теряет', 'свойств и сохраняет', 'омега-3']} at={6} />
+      <Grow cy={1180}>
+        <TimeScale k={1.2}>
+          <OrderToPress cx={540} cy={1180} at={0} />
         </TimeScale>
       </Grow>
     </Beat>
-    <Beat from={76} dur={72}>
-      <KineticText top={290} lines={[lead('До доставки', 6, true), lead('не больше 2 дней', 11)]} />
-      <Grow cy={1100}>
-        <TimeScale k={1.6}>
-          <ShipIn2Days cx={540} cy={1100} at={0} />
+    <Beat from={265} dur={115}>
+      <Text lines={['От маслопресса', 'до вашего стола', 'за 48 часов']} at={6} />
+      <Grow cy={1200}>
+        <TimeScale k={1.2}>
+          <ShipIn2Days cx={540} cy={1200} at={0} />
         </TimeScale>
       </Grow>
     </Beat>
-    <Beat from={148} dur={72} last>
-      <HeroShot oil="peanut" dur={72} focus={[0.82, 0.87]} scale={[2.2, 3.0]} x={[-150, -240]} lines={[lead('Дата отжима', 8, true, COLORS.cream), lead('на каждой бутылке', 13, false, COLORS.cream)]} />
+    <Beat from={380} dur={100} last>
+      <StudioBg floor={1440} />
+      <Text lines={['Дата отжима', 'на каждой бутылке']} at={6} />
+      <StudioBottle oil="peanut" x={540} bottom={1460} height={900} reflect glossAt={10} />
+      <DateRing at={30} />
     </Beat>
   </AbsoluteFill>
 );
+// Pulsing ring around the date field on the peanut bottle label (field sits low, right of centre).
+const DateRing: React.FC<{at: number}> = ({at}) => {
+  const f = useCurrentFrame();
+  const p = interpolate(f, [at, at + 14], [0, 1], {...clamp, easing: Easing.out(Easing.back(2))});
+  const pulse = 1 + 0.05 * Math.sin((f - at) / 4);
+  const h = 900;
+  const w = h * 0.2527;
+  const cx = 540 - w / 2 + w * 0.81;
+  const cy = 1460 - h + h * 0.9;
+  return (
+    <>
+      <div style={{position: 'absolute', left: cx - 80, top: cy - 40, width: 160, height: 80, borderRadius: 40, border: `8px solid ${COLORS.amber}`, transform: `scale(${p * pulse})`, boxShadow: '0 0 30px rgba(201,130,26,0.55)'}} />
+      <Sfx name="tap" at={at} />
+    </>
+  );
+};
 
-// 9. Close-ups, then all ten bottles
+// 11. Close-ups, then all ten bottles
 const LINE: {oil: Oil; name: string}[] = [
   {oil: 'sun', name: 'подсолнечное'},
   {oil: 'linen', name: 'льняное'},
@@ -251,34 +293,33 @@ const DropIn: React.FC<{at: number; children: React.ReactNode}> = ({at, children
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
   const s = spring({frame: f - at, fps, config: {damping: 13, stiffness: 170, mass: 0.7}});
-  return <AbsoluteFill style={{opacity: f >= at ? 1 : 0, transform: `translateY(${(1 - s) * -160}px)`}}>{children}</AbsoluteFill>;
+  return <AbsoluteFill style={{opacity: f >= at ? Math.min(1, (f - at) / 4) : 0, transform: `translateY(${(1 - s) * -140}px)`}}>{children}</AbsoluteFill>;
 };
 const Lineup: React.FC = () => {
   const heroes: {oil: Oil; name: string}[] = [
     {oil: 'linen', name: 'Льняное'},
-    {oil: 'sesame', name: 'Кунжутное'},
+    {oil: 'mustard', name: 'Горчичное'},
     {oil: 'almond', name: 'Миндальное'},
   ];
   return (
     <AbsoluteFill>
-      <Bg color={COLORS.cream} />
       {heroes.map((h, i) => (
-        <Beat key={h.oil} from={i * 42} dur={42}>
-          <HeroShot oil={h.oil} dur={42} focus={[0.45, 0.6]} scale={[1.9, 1.6]} tilt={[i % 2 ? 3 : -3, 0]} lines={[lead(h.name, 4, true, COLORS.cream)]} />
+        <Beat key={h.oil} from={i * 48} dur={48}>
+          <HeroShot oil={h.oil} dur={48} at={4} focus={[0.4, 0.5]} scale={[2.1, 1.8]} tilt={[i % 2 ? 3 : -3, 0]} lines={[h.name]} />
         </Beat>
       ))}
-      <Beat from={126} dur={124} last>
-        <Bg color={COLORS.cream} />
-        <KineticText top={290} lines={[lead('10 масел,', 6, true), lead('у каждого свой вкус', 11)]} />
+      <Beat from={144} dur={150} last>
+        <StudioBg floor={1150} />
+        <Text lines={['10 сыродавленных', 'масел, у каждого', 'свой вкус']} at={6} />
         {LINE.map((b, i) => {
           const row = Math.floor(i / 5);
           const x = 140 + (i % 5) * 200;
-          const bottom = row ? 1500 : 1010;
+          const bottom = row ? 1560 : 1100;
           return (
-            <DropIn key={b.oil} at={14 + i * 5}>
-              <StudioBottle oil={b.oil} x={x} bottom={bottom} height={430} glossAt={20 + i * 3} />
-              <div style={{position: 'absolute', left: x - 110, width: 220, top: bottom + 22, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 34, color: COLORS.ink}}>{b.name}</div>
-              {i % 3 === 0 ? <Sfx name="thud" at={14 + i * 5} gain={0.35} /> : null}
+            <DropIn key={b.oil} at={24 + i * 5}>
+              <StudioBottle oil={b.oil} x={x} bottom={bottom} height={400} glossAt={30 + i * 3} reflect={row === 1} />
+              <div style={{position: 'absolute', left: x - 110, width: 220, top: bottom + 18, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 34, color: COLORS.ink}}>{b.name}</div>
+              {i % 3 === 0 ? <Sfx name="thud" at={24 + i * 5} gain={0.35} /> : null}
             </DropIn>
           );
         })}
@@ -287,15 +328,15 @@ const Lineup: React.FC = () => {
   );
 };
 
-// 10. Call to order
+// 12. Call to order
 const Cta: React.FC = () => (
   <AbsoluteFill>
-    <Bg color={COLORS.cream} />
-    <LogoPlate at={10} cy={460} width={660} />
-    <KineticText top={640} lines={[sub('Заказывайте на', 22, COLORS.inkSoft), lead('maslarada.ru', 26, true), sub('Отжим под ваш заказ', 44)]} />
+    <StudioBg floor={1300} />
+    <LogoPlate at={10} cy={470} width={680} />
+    <KineticText top={660} lines={[{text: 'Заказывайте на', at: 22, role: 'sub', color: COLORS.inkSoft}, {text: 'maslarada.ru', at: 28, role: 'title', sound: false}]} />
     {LINE.map((b, i) => (
-      <DropIn key={b.oil} at={30 + i * 3}>
-        <StudioBottle oil={b.oil} x={99 + i * 98} bottom={1520} height={330} gloss={false} />
+      <DropIn key={b.oil} at={34 + i * 3}>
+        <StudioBottle oil={b.oil} x={99 + i * 98} bottom={1320} height={340} gloss={false} reflect />
       </DropIn>
     ))}
   </AbsoluteFill>
@@ -304,16 +345,18 @@ const Cta: React.FC = () => (
 // Timeline: scenes and the transitions between them.
 type Item = {scene: React.ReactNode; dur: number; fx?: Fx; fxDur?: number};
 const ITEMS: Item[] = [
-  {scene: <Hook />, dur: 100, fx: press('r1'), fxDur: 22},
-  {scene: <WhatItIs />, dur: 115, fx: liquid('r2'), fxDur: 24},
-  {scene: <HeroShot oil="sun" dur={90} focus={[0.3, 0.62]} scale={[2.3, 1.55]} tilt={[-3, 2]} lines={[lead('Сохраняет вкус,', 12, true, COLORS.cream), lead('цвет и запах семян', 17, false, COLORS.cream)]} />, dur: 90, fx: whip(1), fxDur: 12},
-  {scene: <Refined />, dur: 300, fx: zoomThrough(540, 1130), fxDur: 16},
-  {scene: <Olive />, dur: 115, fx: bottleMask(), fxDur: 22},
-  {scene: <Benefits />, dur: 195, fx: splash(540, 1000), fxDur: 22},
-  {scene: <Uses />, dur: 300, fx: flood('r7'), fxDur: 24},
-  {scene: <Fresh />, dur: 220, fx: card(), fxDur: 16},
-  {scene: <Lineup />, dur: 250, fx: whip(-1), fxDur: 12},
-  {scene: <Cta />, dur: 130},
+  {scene: <Hook />, dur: 110, fx: press('p1'), fxDur: 22},
+  {scene: <WhatItIs />, dur: 200, fx: liquid('w1'), fxDur: 24},
+  {scene: <RawMaterial />, dur: 140, fx: whip(1), fxDur: 12},
+  {scene: <Shelf />, dur: SHELF_DUR, fx: zoomThrough(540, 1150), fxDur: 16},
+  {scene: <Taste />, dur: 180, fx: bottleMask(), fxDur: 22},
+  {scene: <Omega />, dur: 300, fx: splash(540, 1100), fxDur: 22},
+  {scene: <VitE />, dur: 270, fx: flood('f1'), fxDur: 24},
+  {scene: <Health />, dur: 290, fx: card(), fxDur: 16},
+  {scene: <Use />, dur: 220, fx: whip(-1), fxDur: 12},
+  {scene: <Fresh />, dur: 480, fx: liquid('w2'), fxDur: 24},
+  {scene: <Lineup />, dur: 294, fx: zoomThrough(540, 900), fxDur: 16},
+  {scene: <Cta />, dur: 140},
 ];
 export const REEL_FRAMES = ITEMS.reduce((s, it) => s + it.dur - (it.fxDur ?? 0), 0);
 

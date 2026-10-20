@@ -128,7 +128,7 @@ export const CompareBottles: React.FC<{cx: number; cy: number; at?: number}> = (
       <g opacity={a} transform={`translate(0 ${(1 - a) * 40})`}>
         <ShelfBottle x={260} y={720} h={620} />
         <text x={260} y={800} textAnchor="middle" fontFamily="MasRegular" fontSize={44} fill={COLORS.inkSoft}>
-          рафинированное
+          с полки магазина
         </text>
       </g>
       <g opacity={b} transform={`translate(0 ${(1 - b) * 40})`}>
