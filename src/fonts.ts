@@ -2,9 +2,8 @@ import {continueRender, delayRender, staticFile} from 'remotion';
 import {FONT} from './theme';
 
 const FACES: [string, string, string][] = [
-  [FONT.black, 'InterDisplay-Black.otf', '900'],
-  [FONT.bold, 'InterDisplay-Bold.otf', '700'],
-  [FONT.semi, 'InterDisplay-SemiBold.otf', '600'],
+  [FONT.medium, 'InterDisplay-Medium.otf', '500'],
+  [FONT.regular, 'InterDisplay-Regular.otf', '400'],
 ];
 
 let started = false;

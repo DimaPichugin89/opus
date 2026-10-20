@@ -1,8 +1,6 @@
 // Simple graphic accents drawn in code.
 import React from 'react';
-import {Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
-
-const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
+import {spring, useCurrentFrame, useVideoConfig} from 'remotion';
 
 // A colour disc that pops in behind the hero, with a thin concentric ring.
 export const Disc: React.FC<{cx: number; cy: number; d: number; color: string; at: number; ring?: string}> = ({cx, cy, d, color, at, ring}) => {
@@ -29,33 +27,5 @@ export const Disc: React.FC<{cx: number; cy: number; d: number; color: string; a
         />
       ) : null}
     </>
-  );
-};
-
-// A hairline that draws itself from one end.
-export const Rule: React.FC<{x: number; y: number; w: number; at: number; color: string; thickness?: number; from?: 'left' | 'right' | 'center'}> = ({
-  x,
-  y,
-  w,
-  at,
-  color,
-  thickness = 4,
-  from = 'left',
-}) => {
-  const f = useCurrentFrame();
-  const p = interpolate(f, [at, at + 14], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: x,
-        top: y,
-        width: w,
-        height: thickness,
-        background: color,
-        transform: `scaleX(${p})`,
-        transformOrigin: from === 'center' ? 'center' : `${from} center`,
-      }}
-    />
   );
 };

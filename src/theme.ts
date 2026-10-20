@@ -33,10 +33,18 @@ export const OIL = {
 export type Oil = keyof typeof OIL;
 
 export const FONT = {
-  black: 'MasBlack',
-  bold: 'MasBold',
-  semi: 'MasSemi',
+  medium: 'MasMedium',
+  regular: 'MasRegular',
 };
+
+// Type scale. Restrained: sentence case, medium/regular weights, tight leading.
+export type TypeRole = {font: keyof typeof FONT; size: number; lineHeight: number; tracking: number};
+export const TYPE = {
+  title: {font: 'medium', size: 120, lineHeight: 1.0, tracking: -0.03},
+  lead: {font: 'medium', size: 90, lineHeight: 1.04, tracking: -0.025},
+  body: {font: 'regular', size: 90, lineHeight: 1.04, tracking: -0.02},
+  cta: {font: 'medium', size: 60, lineHeight: 1.1, tracking: -0.01},
+} satisfies Record<string, TypeRole>;
 
 // Reading time: 0.3 s per word, never under 1.2 s per phrase.
 export const readFrames = (text: string) => {
