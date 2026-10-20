@@ -71,8 +71,8 @@ export const OliveArt: React.FC<{cx: number; cy: number; at?: number}> = ({cx, c
 export const OmegaJars: React.FC<{cx: number; cy: number; at?: number}> = ({cx, cy, at = 0}) => {
   const t = useT(at);
   const jars = [
-    {x: 270, pct: 1, label: 'оливковое', color: OLIVE_OIL, at: 6},
-    {x: 630, pct: 55, label: 'льняное', color: COLORS.amberLight, at: 22},
+    {x: 270, pct: 1, label: 'оливковое', color: OLIVE_OIL, at: 6, sign: '<'},
+    {x: 630, pct: 55, label: 'льняное', color: COLORS.amberLight, at: 22, sign: '≈'},
   ];
   const H = 520;
   const top = 160;
@@ -98,7 +98,7 @@ export const OmegaJars: React.FC<{cx: number; cy: number; at?: number}> = ({cx, 
                 <rect key={m} x={j.x + 60} y={top + H - H * m} width={36} height={5} rx={2.5} fill={INK} opacity={0.5} />
               ))}
               <text x={j.x} y={top - 40} textAnchor="middle" fontFamily="MasMedium" fontSize={92} fill={INK} opacity={p > 0 ? 1 : 0}>
-                ≈{Math.round(j.pct * p)}%
+                {j.sign} {Math.max(j.sign === '<' ? 1 : 0, Math.round(j.pct * p))}%
               </text>
               <text x={j.x} y={top + H + 70} textAnchor="middle" fontFamily="MasRegular" fontSize={48} fill={COLORS.inkSoft}>
                 {j.label}

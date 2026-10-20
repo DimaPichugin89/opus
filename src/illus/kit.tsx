@@ -7,8 +7,12 @@ export const INK = COLORS.ink;
 export const LINE = 6;
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
+// Illustrations can be played faster inside <TimeScale k>: their clock (useT) and their sounds (Sfx) scale together.
+export const TimeScaleContext = React.createContext(1);
+export const TimeScale: React.FC<{k: number; children: React.ReactNode}> = ({k, children}) => <TimeScaleContext.Provider value={k}>{children}</TimeScaleContext.Provider>;
+
 // Local animation time helpers.
-export const useT = (at = 0) => useCurrentFrame() - at;
+export const useT = (at = 0) => useCurrentFrame() * React.useContext(TimeScaleContext) - at;
 export const ramp = (t: number, a: number, b: number, from = 0, to = 1, ease: (x: number) => number = Easing.inOut(Easing.cubic)) =>
   interpolate(t, [a, b], [from, to], {...clamp, easing: ease});
 export const usePop = (at: number, damping = 13) => {

@@ -2,6 +2,7 @@
 // The sounds themselves are synthesised by scripts/gen_sfx.py (each file peaks at -1 dBFS).
 import React from 'react';
 import {Audio, Sequence, staticFile} from 'remotion';
+import {TimeScaleContext} from './illus/kit';
 import {FPS} from './theme';
 
 export const SFX = {
@@ -18,15 +19,17 @@ export const SFX = {
 } as const;
 
 // Global trim for the whole series.
-export const MASTER = 1.04;
+export const MASTER = 0.92;
 
 export type SfxName = keyof typeof SFX;
 
 // Frames before the cut at which the pour starts, so its swell peaks as the liquid covers the frame.
 export const POUR_LEAD = 11;
 
-export const Sfx: React.FC<{name: SfxName; at: number; gain?: number}> = ({name, at, gain = 1}) => {
+// Inside a <TimeScale k> (illus/kit) cue times are illustration time, so they are divided by k.
+export const Sfx: React.FC<{name: SfxName; at: number; gain?: number}> = ({name, at: rawAt, gain = 1}) => {
   const s = SFX[name];
+  const at = Math.round(rawAt / React.useContext(TimeScaleContext));
   return (
     <Sequence from={Math.max(0, at)} durationInFrames={Math.ceil(s.seconds * FPS) + 2} layout="none">
       <Audio src={staticFile(s.file)} volume={s.volume * gain * MASTER} />

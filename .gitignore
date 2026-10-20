@@ -5,3 +5,5 @@ out/review/*
 out/maslarada_general_all.mp4
 .remotion/
 !out/review/studio_cutouts_all.png
+out/maslarada_reel.mp4
+!out/review/reel_storyboard.png

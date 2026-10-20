@@ -9,12 +9,14 @@ import {G5, G5_FRAMES} from './stories/general/G5';
 import {G6, G6_FRAMES} from './stories/general/G6';
 import {G7, G7_FRAMES} from './stories/general/G7';
 import {FxTest, FX_FRAMES} from './dev/FxTest';
+import {Reel, REEL_FRAMES} from './stories/reel/Reel';
 import {FPS, H, W} from './theme';
 
 loadFonts();
 
 // General block: what cold-pressed oil is, how shelf oil differs, benefits, ordering.
 const STORIES = [
+  {id: 'Reel', component: Reel, frames: REEL_FRAMES},
   {id: 'General01', component: G1, frames: G1_FRAMES},
   {id: 'General02', component: G2, frames: G2_FRAMES},
   {id: 'General03', component: G3, frames: G3_FRAMES},
