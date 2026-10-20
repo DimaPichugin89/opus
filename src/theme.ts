@@ -24,14 +24,15 @@ export const COLORS = {
 // Label colours, one per oil.
 export const OIL = {
   sun: '#E2312A',
-  peanut: '#F2C230',
-  mustard: '#C5CF3A',
-  hemp: '#1F7A3F',
-  cedar: '#2F4A35',
   linen: '#4B57D6',
   sesame: '#EDE4D2',
-  almond: '#9C9893',
   pumpkin: '#E0612B',
+  hemp: '#1F7A3F',
+  mustard: '#C5CF3A',
+  camelina: '#9DB83C',
+  almond: '#9C9893',
+  peanut: '#F2C230',
+  thistle: '#B46FC2',
 } as const;
 export type Oil = keyof typeof OIL;
 
@@ -44,8 +45,9 @@ export const FONT = {
 export type TypeRole = {font: keyof typeof FONT; size: number; lineHeight: number; tracking: number};
 export const TYPE = {
   title: {font: 'medium', size: 120, lineHeight: 1.0, tracking: -0.03},
-  lead: {font: 'medium', size: 90, lineHeight: 1.04, tracking: -0.025},
+  lead: {font: 'medium', size: 84, lineHeight: 1.06, tracking: -0.025},
   body: {font: 'regular', size: 90, lineHeight: 1.04, tracking: -0.02},
+  sub: {font: 'regular', size: 56, lineHeight: 1.18, tracking: -0.01},
   cta: {font: 'medium', size: 60, lineHeight: 1.1, tracking: -0.01},
   item: {font: 'medium', size: 80, lineHeight: 1.05, tracking: -0.02},
   note: {font: 'regular', size: 56, lineHeight: 1.15, tracking: -0.01},

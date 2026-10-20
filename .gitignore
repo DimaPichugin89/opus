@@ -1,4 +1,6 @@
 node_modules/
 out/frames/
-out/review/sheet_*.png
+out/review/*
+!out/review/general_overview.png
+out/maslarada_general_all.mp4
 .remotion/
