@@ -9,6 +9,7 @@ import {SeedDrift, SeedRain} from '../../components/Seeds';
 import {Stage} from '../../components/Stage';
 import {HeroBg, StudioBg} from '../../components/StudioBg';
 import {BottleHero, StudioBottle} from '../../components/StudioBottle';
+import {ChapterCard} from '../../components/ChapterCard';
 import {bottleMask, card, flood, liquid, press, splash, whip, zoomThrough, Fx} from '../../fx/presentations';
 import {OmegaPlate, Organs, VitaminE} from '../../illus/benefit';
 import {Grow, TimeScale} from '../../illus/kit';
@@ -44,11 +45,19 @@ const BeatMotion: React.FC<{dur: number; last?: boolean; children: React.ReactNo
   return <AbsoluteFill style={{transform: `translateX(${inP * 220 - outP * 220}px)`, opacity: 1 - Math.max(inP, outP)}}>{children}</AbsoluteFill>;
 };
 
+// Keeps the bottle clear of the text: fully hidden above `clear`, faded in over the next 140 px.
+const heroMask = (clear: number): React.CSSProperties => {
+  const m = `linear-gradient(180deg, rgba(0,0,0,0) ${clear}px, rgba(0,0,0,1) ${clear + 140}px)`;
+  return {WebkitMaskImage: m, maskImage: m};
+};
+
 // Close-up of a real bottle on a dark backdrop in its label colour.
 const HeroShot: React.FC<{oil: Oil; dur: number; lines: string[]; at?: number; focus: [number, number]; scale: [number, number]; tilt?: [number, number]; x?: [number, number]}> = ({oil, dur, lines, at = 10, focus, scale, tilt, x}) => (
   <AbsoluteFill>
     <HeroBg color={OIL[oil]} seed={oil} />
-    <BottleHero oil={oil} dur={dur} focus={focus} scale={scale} tilt={tilt} x={x} />
+    <AbsoluteFill style={heroMask(290 + lines.length * 81 + 70)}>
+      <BottleHero oil={oil} dur={dur} focus={focus} scale={scale} tilt={tilt} x={x} />
+    </AbsoluteFill>
     <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(16,10,5,0.82) 0%, rgba(16,10,5,0.45) 36%, rgba(16,10,5,0) 52%)'}} />
     <Text lines={lines} at={at} color={COLORS.cream} />
   </AbsoluteFill>
@@ -81,7 +90,7 @@ const RawMaterial: React.FC = () => (
   <AbsoluteFill>
     <StudioBg floor={1380} light={[50, 55]} />
     <SeedDrift count={26} seed="raw" kinds={['sunflower', 'sunflower', 'flax', 'pumpkin']} size={[24, 60]} speed={2.5} area={[0, 560, 1080, 1700]} />
-    <StudioBottle oil="sun" x={540} bottom={1400} height={820} reflect glossAt={20} />
+    <StudioBottle oil="sun" x={540} bottom={1420} height={720} reflect glossAt={20} />
     <Text lines={['Масларада делает масло', 'только из первоклассного', 'сырья']} at={10} />
   </AbsoluteFill>
 );
@@ -119,14 +128,13 @@ const Shelf: React.FC = () => {
         );
       })}
       <Beat from={t} dur={SHELF_RESULT} last>
-        <StudioBg floor={1500} />
+        <StudioBg floor={1390} />
         <Text lines={['Так масло теряет', 'природный вкус, запах', 'и часть витамина E']} at={8} />
-        <Grow cy={1160}>
-          <ShelfBottleArt cx={330} cy={1160} at={0} />
-        </Grow>
-        <StudioBottle oil="sun" x={720} bottom={1520} height={760} reflect glossAt={20} />
-        <div style={{position: 'absolute', left: 150, width: 360, top: 1560, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 40, color: COLORS.inkSoft}}>с полки магазина</div>
-        <div style={{position: 'absolute', left: 540, width: 360, top: 1560, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 40, color: COLORS.inkSoft}}>сыродавленное</div>
+        {/* both bottles 700 px tall, standing on the same line; captions well below their shadows */}
+        <ShelfBottleArt cx={330} cy={1040} at={0} />
+        <StudioBottle oil="sun" x={740} bottom={1400} height={700} reflect glossAt={20} />
+        <div style={{position: 'absolute', left: 130, width: 400, top: 1460, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 40, color: COLORS.inkSoft}}>с полки магазина</div>
+        <div style={{position: 'absolute', left: 540, width: 400, top: 1460, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 40, color: COLORS.inkSoft}}>сыродавленное</div>
       </Beat>
     </AbsoluteFill>
   );
@@ -309,16 +317,16 @@ const Lineup: React.FC = () => {
         </Beat>
       ))}
       <Beat from={144} dur={150} last>
-        <StudioBg floor={1150} />
+        <StudioBg />
         <Text lines={['10 сыродавленных', 'масел, у каждого', 'свой вкус']} at={6} />
         {LINE.map((b, i) => {
           const row = Math.floor(i / 5);
-          const x = 140 + (i % 5) * 200;
-          const bottom = row ? 1560 : 1100;
+          const x = 120 + (i % 5) * 210;
+          const bottom = row ? 1480 : 980;
           return (
             <DropIn key={b.oil} at={24 + i * 5}>
-              <StudioBottle oil={b.oil} x={x} bottom={bottom} height={400} glossAt={30 + i * 3} reflect={row === 1} />
-              <div style={{position: 'absolute', left: x - 110, width: 220, top: bottom + 18, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 34, color: COLORS.ink}}>{b.name}</div>
+              <StudioBottle oil={b.oil} x={x} bottom={bottom} height={340} glossAt={30 + i * 3} />
+              <div style={{position: 'absolute', left: x - 105, width: 210, top: bottom + 26, textAlign: 'center', fontFamily: 'MasRegular', fontSize: 28, color: COLORS.ink}}>{b.name}</div>
               {i % 3 === 0 ? <Sfx name="thud" at={24 + i * 5} gain={0.35} /> : null}
             </DropIn>
           );
@@ -344,17 +352,23 @@ const Cta: React.FC = () => (
 
 // Timeline: scenes and the transitions between them.
 type Item = {scene: React.ReactNode; dur: number; fx?: Fx; fxDur?: number};
+const CH = 60; // chapter title card
 const ITEMS: Item[] = [
+  {scene: <ChapterCard n={1} title={['Польза']} />, dur: CH, fx: zoomThrough(540, 700), fxDur: 16},
   {scene: <Hook />, dur: 110, fx: press('p1'), fxDur: 22},
+  {scene: <ChapterCard n={2} title={['Процесс', 'производства']} />, dur: CH, fx: whip(1), fxDur: 12},
   {scene: <WhatItIs />, dur: 200, fx: liquid('w1'), fxDur: 24},
-  {scene: <RawMaterial />, dur: 140, fx: whip(1), fxDur: 12},
+  {scene: <RawMaterial />, dur: 140, fx: whip(-1), fxDur: 12},
   {scene: <Shelf />, dur: SHELF_DUR, fx: zoomThrough(540, 1150), fxDur: 16},
-  {scene: <Taste />, dur: 180, fx: bottleMask(), fxDur: 22},
+  {scene: <ChapterCard n={3} title={['Вкус и запах']} />, dur: CH, fx: bottleMask(), fxDur: 22},
+  {scene: <Taste />, dur: 180, fx: card(), fxDur: 16},
+  {scene: <ChapterCard n={4} title={['Витамины']} />, dur: CH, fx: whip(1), fxDur: 12},
   {scene: <Omega />, dur: 300, fx: splash(540, 1100), fxDur: 22},
   {scene: <VitE />, dur: 270, fx: flood('f1'), fxDur: 24},
   {scene: <Health />, dur: 290, fx: card(), fxDur: 16},
+  {scene: <ChapterCard n={5} title={['Как употреблять', 'в пищу']} />, dur: CH, fx: liquid('w3'), fxDur: 24},
   {scene: <Use />, dur: 220, fx: whip(-1), fxDur: 12},
-  {scene: <Fresh />, dur: 480, fx: liquid('w2'), fxDur: 24},
+  {scene: <Fresh />, dur: 480, fx: press('p2'), fxDur: 22},
   {scene: <Lineup />, dur: 294, fx: zoomThrough(540, 900), fxDur: 16},
   {scene: <Cta />, dur: 140},
 ];
