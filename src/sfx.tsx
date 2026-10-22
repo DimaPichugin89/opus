@@ -15,6 +15,9 @@ export const SFX = {
   seeds: {file: 'sfx/seeds.wav', seconds: 1.6, volume: 0.3}, // seeds raining onto the table
   press: {file: 'sfx/press.wav', seconds: 2.6, volume: 0.2}, // screw press running
   swish: {file: 'sfx/swish.wav', seconds: 0.32, volume: 0.3}, // fast camera move
+  rise: {file: 'sfx/rise.wav', seconds: 1.2, volume: 0.32}, // volume slider up, sound opens
+  fall: {file: 'sfx/fall.wav', seconds: 1.0, volume: 0.32}, // volume slider down, sound dulls
+  tick: {file: 'sfx/tick.wav', seconds: 0.06, volume: 0.3}, // scale notch
   squeeze: {file: 'sfx/squeeze.wav', seconds: 1.3, volume: 0.42}, // press plates crush the seeds: rumble, crack, squish
 } as const;
 

@@ -254,6 +254,37 @@ def swish():
     return pan(fade(band * amp, 2, 40), 0.25 + 0.5 * p)
 
 
+def glide(f0, f1, dur, air_lo, air_hi):
+    """Soft tone gliding f0 -> f1 (two sine partials) with breathy air following it."""
+    t = t_axis(dur)
+    p = t / dur
+    curve = p * p * (3 - 2 * p)
+    freq = f0 * (f1 / f0) ** curve
+    ph = 2 * np.pi * np.cumsum(freq) / SR
+    tone = np.sin(ph) + 0.28 * np.sin(2 * ph) + 0.08 * np.sin(3 * ph)
+    air = svf_bandpass(rng.standard_normal(len(t)), air_lo + (air_hi - air_lo) * curve, q=1.4)
+    amp = np.sin(np.pi * np.clip(p * 1.05, 0, 1)) ** 1.5
+    return stereo(fade((tone * 0.7 + air * 0.5) * amp, 5, 80), 0.6)
+
+
+def rise():
+    """Volume slider pushed up: the sound opens and brightens."""
+    return glide(150, 440, 1.2, 500, 4200)
+
+
+def fall():
+    """Volume slider pulled down: the sound dulls and sinks."""
+    return glide(330, 90, 1.0, 2600, 300)
+
+
+def tick():
+    """A dry little click, like a scale notch."""
+    n = int(SR * 0.06)
+    hit = burst(0.6, 9000, n)
+    mono = resonator(hit, 2900, 0.006) + resonator(hit, 1700, 0.01) * 0.5
+    return stereo(fade(mono, 0.1, 15), 0.2)
+
+
 def svf_bandpass(x, freqs, q):
     """State-variable band-pass with a per-sample centre frequency."""
     low = band = 0.0
@@ -286,5 +317,5 @@ def write(name, data):
 if __name__ == "__main__":
     for old in OUT.glob("*.wav"):
         old.unlink()
-    for fn in (tap, pour, thud, clink, plop, chord, seeds, press, squeeze, swish):
+    for fn in (tap, pour, thud, clink, plop, chord, seeds, press, squeeze, swish, rise, fall, tick):
         write(fn.__name__, fn())
