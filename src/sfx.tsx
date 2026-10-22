@@ -21,6 +21,9 @@ export const SFX = {
 // Global trim for the whole series.
 export const MASTER = 0.98;
 
+// Per-video trim on top of MASTER (a short, dense cut needs a little less).
+export const MixGain = React.createContext(1);
+
 export type SfxName = keyof typeof SFX;
 
 // Frames before the cut at which the pour starts, so its swell peaks as the liquid covers the frame.
@@ -30,9 +33,10 @@ export const POUR_LEAD = 11;
 export const Sfx: React.FC<{name: SfxName; at: number; gain?: number}> = ({name, at: rawAt, gain = 1}) => {
   const s = SFX[name];
   const at = Math.round(rawAt / React.useContext(TimeScaleContext));
+  const mix = React.useContext(MixGain);
   return (
     <Sequence from={Math.max(0, at)} durationInFrames={Math.ceil(s.seconds * FPS) + 2} layout="none">
-      <Audio src={staticFile(s.file)} volume={s.volume * gain * MASTER} />
+      <Audio src={staticFile(s.file)} volume={s.volume * gain * mix * MASTER} />
     </Sequence>
   );
 };

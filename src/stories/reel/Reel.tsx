@@ -24,14 +24,14 @@ import {COLORS, OIL, Oil} from '../../theme';
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
 // A phrase split over lines: the first line taps, words rise one after another.
-const phrase = (lines: string[], at: number, color?: string): TextLine[] =>
+export const phrase = (lines: string[], at: number, color?: string): TextLine[] =>
   lines.map((text, i) => ({text, at: at + i * 6, role: 'para', color, sound: i === 0, stagger: 2}));
-const Text: React.FC<{lines: string[]; at: number; top?: number; out?: number; color?: string}> = ({lines, at, top = 290, out, color}) => (
+export const Text: React.FC<{lines: string[]; at: number; top?: number; out?: number; color?: string}> = ({lines, at, top = 290, out, color}) => (
   <KineticText top={top} out={out} lines={phrase(lines, at, color)} />
 );
 
 // Quick internal beats inside a scene: each beat pushes in from the side and leaves the other way.
-const Beat: React.FC<{from: number; dur: number; children: React.ReactNode; last?: boolean}> = ({from, dur, children, last}) => (
+export const Beat: React.FC<{from: number; dur: number; children: React.ReactNode; last?: boolean}> = ({from, dur, children, last}) => (
   <Sequence from={from} durationInFrames={dur}>
     <BeatMotion dur={dur} last={last}>
       {children}
@@ -52,7 +52,7 @@ const heroMask = (clear: number): React.CSSProperties => {
 };
 
 // Close-up of a real bottle on a dark backdrop in its label colour.
-const HeroShot: React.FC<{oil: Oil; dur: number; lines: string[]; at?: number; focus: [number, number]; scale: [number, number]; tilt?: [number, number]; x?: [number, number]}> = ({oil, dur, lines, at = 10, focus, scale, tilt, x}) => (
+export const HeroShot: React.FC<{oil: Oil; dur: number; lines: string[]; at?: number; focus: [number, number]; scale: [number, number]; tilt?: [number, number]; x?: [number, number]}> = ({oil, dur, lines, at = 10, focus, scale, tilt, x}) => (
   <AbsoluteFill>
     <HeroBg color={OIL[oil]} seed={oil} />
     <AbsoluteFill style={heroMask(290 + lines.length * 81 + 70)}>
@@ -180,7 +180,7 @@ const VitE: React.FC = () => (
     </Beat>
   </AbsoluteFill>
 );
-const Fraction: React.FC<{at: number}> = ({at}) => {
+export const Fraction: React.FC<{at: number}> = ({at}) => {
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
   const s = spring({frame: f - at, fps, config: {damping: 12, stiffness: 160}});
