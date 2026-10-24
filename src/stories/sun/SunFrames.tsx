@@ -1,346 +1,292 @@
 // Style frames for the sunflower reel: one still per scene, frame n shows scene n.
-// Story: ordinary (refined) oil on black -> why it has no smell -> what is lost;
-// cold-pressed on white -> what stays -> vitamin E per tablespoon -> order.
+// Black: why shop sunflower oil has no smell, three reasons. White: our bottle, how it is made,
+// what it is rich in, order-to-table time, the range and the call to order.
 import React from 'react';
-import {AbsoluteFill, useCurrentFrame} from 'remotion';
-import {COLORS, FONT, TYPE} from '../../theme';
+import {AbsoluteFill, Img, staticFile, useCurrentFrame} from 'remotion';
+import {COLORS, FONT} from '../../theme';
 
-type Theme = {bg: string; text: string; sub: string; line: string; fill: string};
-const LIGHT: Theme = {bg: '#FFFFFF', text: COLORS.ink, sub: COLORS.inkSoft, line: '#4A3424', fill: '#FFFFFF'};
-const DARK: Theme = {bg: '#0E0C0A', text: '#F5F1EA', sub: '#A9A39A', line: '#D9D3C9', fill: '#1A1714'};
+type Theme = {bg: string; text: string; sub: string; line: string; ghost: string};
+const LIGHT: Theme = {bg: '#FFFFFF', text: COLORS.ink, sub: '#8A7868', line: COLORS.ink, ghost: 'rgba(38,23,13,0.035)'};
+const DARK: Theme = {bg: '#0D0B09', text: '#F5F1EA', sub: '#9A938A', line: '#EDE7DD', ghost: 'rgba(255,255,255,0.045)'};
 const ThemeCtx = React.createContext(LIGHT);
 const useTheme = () => React.useContext(ThemeCtx);
 
-const GOLD_A = '#F6C453';
-const GOLD_B = '#C9821A';
+const GOLD = '#C9821A';
+const GOLD_L = '#F2B640';
+const LEFT = 96;
 
-const Text: React.FC<{lines: string[]; sub?: string[]; top?: number}> = ({lines, sub = [], top = 290}) => {
+// --- type --------------------------------------------------------------------------------
+
+const Overline: React.FC<{top: number; children: React.ReactNode}> = ({top, children}) => (
+  <div style={{position: 'absolute', top, left: LEFT, fontFamily: FONT.medium, fontSize: 38, letterSpacing: '0.01em', color: GOLD}}>{children}</div>
+);
+
+const Head: React.FC<{top: number; lines: string[]; size?: number; color?: string}> = ({top, lines, size = 84, color}) => {
   const t = useTheme();
   return (
-    <div style={{position: 'absolute', top, left: 64, right: 64, textAlign: 'center'}}>
+    <div style={{position: 'absolute', top, left: LEFT, right: LEFT, fontFamily: FONT.medium, fontSize: size, lineHeight: 1.04, letterSpacing: '-0.03em', color: color ?? t.text}}>
       {lines.map((l) => (
-        <div key={l} style={{fontFamily: FONT.medium, fontSize: TYPE.para.size, lineHeight: TYPE.para.lineHeight, letterSpacing: `${TYPE.para.tracking}em`, color: t.text}}>
-          {l}
-        </div>
-      ))}
-      {sub.map((l, i) => (
-        <div key={l} style={{fontFamily: FONT.regular, fontSize: 52, lineHeight: 1.2, color: t.sub, marginTop: i === 0 ? 18 : 0}}>
-          {l}
-        </div>
+        <div key={l}>{l}</div>
       ))}
     </div>
   );
 };
 
+const Sub: React.FC<{top: number; lines: string[]; size?: number}> = ({top, lines, size = 46}) => {
+  const t = useTheme();
+  return (
+    <div style={{position: 'absolute', top, left: LEFT, right: LEFT, fontFamily: FONT.regular, fontSize: size, lineHeight: 1.22, letterSpacing: '-0.01em', color: t.sub}}>
+      {lines.map((l) => (
+        <div key={l}>{l}</div>
+      ))}
+    </div>
+  );
+};
+
+// Huge background numeral, cropped by the frame edge: depth without noise.
+const Ghost: React.FC<{children: React.ReactNode; right?: number; bottom?: number; size?: number}> = ({children, right = -60, bottom = 120, size = 1250}) => {
+  const t = useTheme();
+  return <div style={{position: 'absolute', right, bottom, fontFamily: FONT.medium, fontSize: size, lineHeight: 0.8, letterSpacing: '-0.06em', color: t.ghost}}>{children}</div>;
+};
+
+// Big gold figure used for the key numbers.
+const Figure: React.FC<{top: number; children: React.ReactNode; size?: number}> = ({top, children, size = 330}) => (
+  <div style={{position: 'absolute', top, left: LEFT - 12, fontFamily: FONT.medium, fontSize: size, lineHeight: 0.9, letterSpacing: '-0.055em', color: GOLD, whiteSpace: 'nowrap', fontFeatureSettings: '"tnum"'}}>{children}</div>
+);
+
 const Svg: React.FC<{children: React.ReactNode}> = ({children}) => (
   <svg width={1080} height={1920} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0}}>
     <defs>
       <linearGradient id="gold" x1="0.2" y1="0" x2="0.8" y2="1">
-        <stop offset="0" stopColor={GOLD_A} />
-        <stop offset="1" stopColor={GOLD_B} />
+        <stop offset="0" stopColor={GOLD_L} />
+        <stop offset="1" stopColor={GOLD} />
       </linearGradient>
-      <linearGradient id="pale" x1="0.2" y1="0" x2="0.8" y2="1">
-        <stop offset="0" stopColor="#F4EDCF" />
-        <stop offset="1" stopColor="#DCD0A0" />
+      <linearGradient id="fadeUp" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stopColor="#EDE7DD" stopOpacity="0.9" />
+        <stop offset="1" stopColor="#EDE7DD" stopOpacity="0" />
       </linearGradient>
-      <filter id="steamBlur" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="10" />
-      </filter>
+      <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stopColor={GOLD} stopOpacity="0.16" />
+        <stop offset="1" stopColor={GOLD} stopOpacity="0" />
+      </radialGradient>
+      <radialGradient id="contact" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stopColor="#26170D" stopOpacity="0.28" />
+        <stop offset="1" stopColor="#26170D" stopOpacity="0" />
+      </radialGradient>
     </defs>
     {children}
   </svg>
 );
 
-const Label: React.FC<{x: number; y: number; children: React.ReactNode; size?: number; color?: string; weight?: 'medium' | 'regular'}> = ({x, y, children, size = 40, color, weight = 'regular'}) => {
+// --- monoline icons (one stroke weight, one amber accent each) -----------------------------
+
+const STROKE = 4;
+const mono = (t: Theme) => ({fill: 'none', stroke: t.line, strokeWidth: STROKE, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const});
+
+const SeedLine: React.FC<{x: number; y: number; rot: number; s?: number}> = ({x, y, rot, s = 1}) => {
   const t = useTheme();
   return (
-    <text x={x} y={y} textAnchor="middle" fontFamily={FONT[weight]} fontSize={size} fill={color ?? t.sub}>
-      {children}
-    </text>
-  );
-};
-
-// --- drawing kit ---------------------------------------------------------------------
-
-// Glass bowl, side view; the oil inside is gold (cold-pressed) or pale (refined).
-const Bowl: React.FC<{x: number; y: number; pale?: boolean}> = ({x, y, pale}) => {
-  const t = useTheme();
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <path d="M -230 0 C -220 150 -120 210 0 210 C 120 210 220 150 230 0 Z" fill={t.fill} stroke={t.line} strokeWidth={4} />
-      <path d="M -200 40 C -186 140 -100 186 0 186 C 100 186 186 140 200 40 Z" fill={pale ? 'url(#pale)' : 'url(#gold)'} />
-      <ellipse cx={0} cy={40} rx={200} ry={26} fill={pale ? '#F7F1D9' : GOLD_A} />
-      <ellipse cx={0} cy={0} rx={230} ry={34} fill="none" stroke={t.line} strokeWidth={4} />
-      <path d="M -170 70 C -160 120 -120 150 -80 165" fill="none" stroke="#fff" strokeOpacity={0.35} strokeWidth={8} strokeLinecap="round" />
+    <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`} {...mono(t)}>
+      <path d="M 0 -62 C 30 -46 34 22 0 62 C -34 22 -30 -46 0 -62 Z" />
+      <path d="M -9 -36 C -11 -8 -10 18 -5 40 M 9 -36 C 11 -8 10 18 5 40" strokeOpacity={0.5} strokeWidth={3} />
     </g>
   );
 };
 
-// Aroma: crisp golden curls rising. Faded = dashed and grey, the smell is gone.
-const Aroma: React.FC<{x: number; y: number; faded?: boolean; s?: number}> = ({x, y, faded, s = 1}) => {
+// Ordinary shop bottle: tall, ribbed, clear plastic.
+const ShopBottle: React.FC<{x: number; y: number}> = ({x, y}) => {
   const t = useTheme();
   return (
-    <g transform={`translate(${x} ${y}) scale(${s})`} fill="none" stroke={faded ? t.line : GOLD_B} strokeOpacity={faded ? 0.3 : 1} strokeWidth={7} strokeLinecap="round" strokeDasharray={faded ? '4 16' : undefined}>
-      {[-70, 0, 70].map((dx, i) => (
-        <path key={i} d={`M ${dx} 0 c -34 -30 34 -60 0 -90 c -34 -30 30 -54 6 -84 c -14 -18 4 -30 18 -22`} />
+    <g transform={`translate(${x} ${y})`} {...mono(t)}>
+      <rect x={-34} y={-430} width={68} height={44} rx={10} />
+      <path d="M -26 -386 L -26 -330 C -26 -290 -120 -280 -120 -200 L -120 -120 C -100 -100 -100 -80 -120 -60 L -120 330 Q -120 370 -80 370 L 80 370 Q 120 370 120 330 L 120 -60 C 100 -80 100 -100 120 -120 L 120 -200 C 120 -280 26 -290 26 -330 L 26 -386" />
+      <path d="M -120 40 L 120 40" strokeOpacity={0.35} />
+      <path d="M -96 -40 L -96 320" strokeOpacity={0.25} strokeWidth={10} />
+    </g>
+  );
+};
+
+const Reason1Icon: React.FC = () => {
+  const t = useTheme();
+  return (
+    <g>
+      <circle cx={540} cy={1250} r={330} fill="url(#glow)" />
+      <SeedLine x={420} y={1130} rot={-28} />
+      <SeedLine x={540} y={1110} rot={4} />
+      <SeedLine x={660} y={1130} rot={30} />
+      <line x1={310} y1={1210} x2={770} y2={1210} {...mono(t)} />
+      {[400, 540, 680].map((x, i) => (
+        <path key={x} d={`M ${x} 1450 c -26 -32 26 -64 0 -96 c -26 -32 26 -64 0 -96`} fill="none" stroke={GOLD} strokeWidth={STROKE + 1} strokeLinecap="round" opacity={i === 1 ? 1 : 0.75} />
       ))}
     </g>
   );
 };
 
-// Steam: soft blurred plumes, hazy and straight, unlike the crisp aroma curls.
-const Steam: React.FC<{x: number; y: number; h: number; w?: number}> = ({x, y, h, w = 70}) => (
-  <g filter="url(#steamBlur)" fill="#CFCBC4">
-    {[-w, 0, w].map((dx, i) => (
-      <path key={i} d={`M ${x + dx - 14} ${y} C ${x + dx - 30} ${y - h * 0.4} ${x + dx + 26} ${y - h * 0.6} ${x + dx - 4} ${y - h - (i % 2) * 40} C ${x + dx + 40} ${y - h * 0.6} ${x + dx + 10} ${y - h * 0.3} ${x + dx + 14} ${y} Z`} fillOpacity={0.55} />
-    ))}
-  </g>
-);
-
-const Flame: React.FC<{x: number; y: number; s?: number}> = ({x, y, s = 1}) => (
-  <g transform={`translate(${x} ${y}) scale(${s})`}>
-    <path d="M 0 -70 C 30 -36 52 -10 44 22 C 38 48 18 62 0 62 C -18 62 -38 48 -44 22 C -50 -2 -30 -18 -20 -36 C -16 -18 -6 -12 -2 -14 C -8 -34 -6 -52 0 -70 Z" fill="#E8833A" />
-    <path d="M 0 -6 C 14 8 22 22 18 36 C 14 48 6 54 0 54 C -6 54 -16 48 -18 36 C -20 22 -8 12 0 -6 Z" fill={GOLD_A} />
-  </g>
-);
-
-// Sunflower seed: dark shell with pale stripes.
-const Seed: React.FC<{x: number; y: number; rot: number; s?: number}> = ({x, y, rot, s = 1}) => (
-  <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
-    <path d="M 0 -30 C 14 -22 16 10 0 30 C -16 10 -14 -22 0 -30 Z" fill="#2E2219" />
-    <path d="M -5 -18 C -6 -4 -6 8 -3 20 M 5 -18 C 6 -4 6 8 3 20" stroke="#B9AD9C" strokeWidth={2.4} fill="none" strokeLinecap="round" />
-  </g>
-);
-
-// Vitamin E as a coin of three parts; `parts` of them are present, the rest are dashed outlines.
-const VitaminE: React.FC<{x: number; y: number; r: number; parts: number; drift?: boolean}> = ({x, y, r, parts, drift}) => {
-  const t = useTheme();
-  const seg = (k: number) => {
-    const a0 = ((k * 120 - 90 + 3) * Math.PI) / 180;
-    const a1 = (((k + 1) * 120 - 90 - 3) * Math.PI) / 180;
-    const ri = r * 0.62;
-    const p = (a: number, rr: number) => `${x + rr * Math.cos(a)} ${y + rr * Math.sin(a)}`;
-    return `M ${p(a0, r)} A ${r} ${r} 0 0 1 ${p(a1, r)} L ${p(a1, ri)} A ${ri} ${ri} 0 0 0 ${p(a0, ri)} Z`;
-  };
-  return (
-    <g>
-      {[0, 1, 2].map((k) => {
-        const on = k < parts;
-        const off = drift && !on ? `translate(${r * 0.28} ${-r * 0.2})` : undefined;
-        return <path key={k} d={seg(k)} transform={off} fill={on ? 'url(#gold)' : 'none'} stroke={on ? 'none' : t.line} strokeOpacity={0.7} strokeWidth={4} strokeDasharray={on ? undefined : '10 10'} />;
-      })}
-      <text x={x} y={y + r * 0.2} textAnchor="middle" fontFamily={FONT.medium} fontSize={r * 0.56} fill={parts ? GOLD_B : t.line}>
-        E
-      </text>
-    </g>
-  );
+const dropD = (h: number) => {
+  const r = h / 2.7;
+  return `M 0 ${-h} C ${r * 0.25} ${-h + r * 0.65} ${r} ${-r * 1.45} ${r} ${-r * 0.95} A ${r} ${r} 0 1 1 ${-r} ${-r * 0.95} C ${-r} ${-r * 1.45} ${-r * 0.25} ${-h + r * 0.65} 0 ${-h} Z`;
 };
 
-// Generic clear supermarket bottle, upright, mouth at (0, -260).
-const PlainBottle: React.FC = () => {
+const Reason2Icon: React.FC = () => {
   const t = useTheme();
   return (
     <g>
-      <rect x={-24} y={-270} width={48} height={28} rx={6} fill={t.line} />
-      <path d="M -20 -242 L -20 -190 C -20 -150 -85 -140 -85 -80 L -85 210 Q -85 240 -55 240 L 55 240 Q 85 240 85 210 L 85 -80 C 85 -140 20 -150 20 -190 L 20 -242 Z" fill="none" stroke={t.line} strokeWidth={4} />
-      <path d="M -77 -40 L 77 -40 L 77 210 Q 77 232 55 232 L -55 232 Q -77 232 -77 210 Z" fill="url(#pale)" opacity={0.9} />
-    </g>
-  );
-};
-
-const Press: React.FC<{x: number; y: number; s?: number}> = ({x, y, s = 1}) => {
-  const t = useTheme();
-  return (
-    <g transform={`translate(${x} ${y}) scale(${s})`} stroke={t.line} strokeWidth={4} fill="#EDE8E0">
-      <rect x={-24} y={-130} width={48} height={80} rx={10} />
-      <rect x={-190} y={-52} width={380} height={52} rx={16} />
-      {Array.from({length: 11}, (_, i) => (
-        <Seed key={i} x={-160 + i * 32} y={18} rot={90 + ((i * 41) % 30) - 15} s={0.62} />
-      ))}
-      <rect x={-190} y={36} width={380} height={30} rx={12} />
-    </g>
-  );
-};
-
-const Thermo: React.FC<{x: number; y: number; label: string; color: string}> = ({x, y, label, color}) => {
-  const t = useTheme();
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <rect x={-14} y={-150} width={28} height={170} rx={14} fill={t.fill} stroke={t.line} strokeWidth={4} />
-      <circle cx={0} cy={36} r={30} fill={color} stroke={t.line} strokeWidth={4} />
-      <rect x={-6} y={-60} width={12} height={90} rx={6} fill={color} />
-      <text x={0} y={120} textAnchor="middle" fontFamily={FONT.medium} fontSize={46} fill={color}>
-        {label}
-      </text>
-    </g>
-  );
-};
-
-const Arrow: React.FC<{x: number; y1: number; y2: number}> = ({x, y1, y2}) => {
-  const t = useTheme();
-  return (
-    <g stroke={t.line} strokeOpacity={0.55} strokeWidth={4} strokeLinecap="round" fill="none">
-      <line x1={x} y1={y1} x2={x} y2={y2} strokeDasharray="2 14" />
-      <path d={`M ${x - 12} ${y2 - 14} L ${x} ${y2} L ${x + 12} ${y2 - 14}`} />
-    </g>
-  );
-};
-
-// Tablespoon from above, bowl up, full of oil.
-const Tablespoon: React.FC<{x: number; y: number}> = ({x, y}) => {
-  const t = useTheme();
-  return (
-    <g transform={`translate(${x} ${y}) rotate(-24)`}>
-      <rect x={-17} y={110} width={34} height={300} rx={17} fill={t.fill} stroke={t.line} strokeWidth={4} />
-      <ellipse cx={0} cy={0} rx={96} ry={128} fill={t.fill} stroke={t.line} strokeWidth={4} />
-      <ellipse cx={0} cy={0} rx={84} ry={116} fill="url(#gold)" />
-      <ellipse cx={-30} cy={-50} rx={13} ry={30} fill="#fff" opacity={0.45} transform="rotate(16 -30 -50)" />
-    </g>
-  );
-};
-
-const PhoneIcon: React.FC<{x: number; y: number}> = ({x, y}) => {
-  const t = useTheme();
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <rect x={-52} y={-90} width={104} height={180} rx={18} fill={t.fill} stroke={t.line} strokeWidth={5} />
-      <path d="M -22 2 L -6 18 L 24 -16" fill="none" stroke={GOLD_B} strokeWidth={8} strokeLinecap="round" strokeLinejoin="round" />
-    </g>
-  );
-};
-
-const BrandBottle: React.FC<{x: number; y: number; s?: number}> = ({x, y, s = 1}) => {
-  const t = useTheme();
-  return (
-    <g transform={`translate(${x} ${y}) scale(${s})`} stroke={t.line} strokeWidth={5} strokeLinejoin="round">
-      <rect x={-26} y={-300} width={52} height={40} rx={8} fill="#3A2C22" />
-      <path d="M -22 -260 L -22 -200 C -22 -160 -95 -150 -95 -90 L -95 210 Q -95 240 -65 240 L 65 240 Q 95 240 95 210 L 95 -90 C 95 -150 22 -160 22 -200 L 22 -260 Z" fill="url(#gold)" />
-      <rect x={-84} y={-20} width={168} height={180} rx={10} fill="#FFFFFF" />
-      <rect x={-72} y={92} width={144} height={44} rx={8} fill="#FFF1D0" stroke={GOLD_B} strokeWidth={4} />
-      <text x={0} y={122} textAnchor="middle" fontFamily={FONT.medium} fontSize={21} fill={GOLD_B} stroke="none">
-        дата отжима
-      </text>
-      <line x1={-54} y1={30} x2={54} y2={30} strokeWidth={6} strokeLinecap="round" opacity={0.35} />
-      <line x1={-54} y1={60} x2={30} y2={60} strokeWidth={6} strokeLinecap="round" opacity={0.35} />
-    </g>
-  );
-};
-
-// --- scenes ---------------------------------------------------------------------------
-
-// 1. The familiar fact: ordinary sunflower oil pours, and nothing rises above it.
-const S1 = () => (
-  <>
-    <Text lines={['Почему обычное', 'подсолнечное', 'ничем не пахнет?']} />
-    <Svg>
-      <g transform="translate(360 830) rotate(125)">
-        <PlainBottle />
+      <circle cx={360} cy={1250} r={260} fill="url(#glow)" />
+      <g transform="translate(330 1400)">
+        <path d={dropD(300)} fill="url(#gold)" />
+        <path d={dropD(300)} {...mono(t)} />
       </g>
-      <path d="M 573 978 C 578 1070 572 1180 572 1290" stroke="url(#pale)" strokeWidth={14} strokeLinecap="round" fill="none" />
-      <Bowl x={572} y={1300} pale />
-    </Svg>
-  </>
-);
+      <g {...mono(t)} strokeOpacity={0.6}>
+        <line x1={460} y1={1290} x2={610} y2={1290} strokeDasharray="2 16" />
+        <path d="M 592 1272 L 612 1290 L 592 1308" />
+      </g>
+      <g transform="translate(750 1400)">
+        <path d={dropD(300)} {...mono(t)} />
+        <path d={`M ${-300 / 2.7 * 0.55} ${-300 / 2.7 * 0.5} A ${300 / 2.7 * 0.6} ${300 / 2.7 * 0.6} 0 0 0 ${-300 / 2.7 * 0.1} ${-300 / 2.7 * 0.05}`} {...mono(t)} strokeOpacity={0.45} />
+      </g>
+    </g>
+  );
+};
 
-// 2. The cause: seeds are heated, the oil is steamed at 200 °C.
-const S2 = () => {
-  const t = DARK;
-  const seeds = Array.from({length: 14}, (_, i) => ({x: 370 + (i % 7) * 56 + (i > 6 ? 28 : 0), y: 790 + (i > 6 ? 22 : 0), rot: 90 + ((i * 37) % 40) - 20}));
+const Reason3Icon: React.FC = () => {
+  const t = useTheme();
+  return (
+    <g>
+      <circle cx={540} cy={1260} r={330} fill="url(#glow)" />
+      {/* steam rising off the oil surface */}
+      {[-120, 0, 120].map((dx, i) => (
+        <path key={dx} d={`M ${540 + dx} 1390 c -40 -50 40 -100 0 -150 c -40 -50 40 -100 0 -150`} fill="none" stroke="url(#fadeUp)" strokeWidth={STROKE + 2} strokeLinecap="round" opacity={i === 1 ? 1 : 0.8} />
+      ))}
+      <path d="M 300 1420 Q 420 1400 540 1420 T 780 1420" {...mono(t)} />
+      <path d="M 300 1460 Q 420 1440 540 1460 T 780 1460" {...mono(t)} strokeOpacity={0.35} />
+      {/* thermometer with the amber bulb */}
+      <g {...mono(t)}>
+        <path d="M 850 1110 L 850 1330 M 886 1110 L 886 1330" />
+        <path d="M 850 1110 A 18 18 0 0 1 886 1110" />
+      </g>
+      <circle cx={868} cy={1362} r={36} fill={GOLD} />
+      <rect x={860} y={1140} width={16} height={200} rx={8} fill={GOLD} />
+    </g>
+  );
+};
+
+// Product cutout standing on a soft contact shadow; height in px, bottom at y.
+const Bottle: React.FC<{oil: string; x: number; bottom: number; height: number}> = ({oil, x, bottom, height}) => {
+  const w = height * 0.2527;
   return (
     <>
-      <Text lines={['Семена прогревают,', 'а масло пропаривают', 'при 200 °C']} />
-      <Svg>
-        {/* step 1: seeds on a hot tray */}
-        <rect x={330} y={826} width={420} height={22} rx={11} fill="#5A544D" stroke={t.line} strokeWidth={3} />
-        {seeds.map((s, i) => (
-          <Seed key={i} x={s.x} y={s.y} rot={s.rot} s={0.8} />
-        ))}
-        <Flame x={440} y={930} s={0.8} />
-        <Flame x={540} y={924} s={0.95} />
-        <Flame x={640} y={930} s={0.8} />
-        <Arrow x={540} y1={1010} y2={1090} />
-        {/* step 2: oil in a tank, steam rising through it */}
-        <rect x={380} y={1190} width={320} height={300} rx={40} fill="#1A1714" stroke={t.line} strokeWidth={4} />
-        <rect x={396} y={1290} width={288} height={184} rx={28} fill="url(#pale)" />
-        <Steam x={540} y={1200} h={150} w={80} />
-        <text x={760} y={1360} fontFamily={FONT.medium} fontSize={56} fill="#F5F1EA">
-          200 °C
-        </text>
-      </Svg>
+      <div style={{position: 'absolute', left: x - w * 1.1, top: bottom - w * 0.18, width: w * 2.2, height: w * 0.36, background: 'radial-gradient(closest-side, rgba(38,23,13,0.28), rgba(38,23,13,0))'}} />
+      <Img src={staticFile(`cut/studio/${oil}.png`)} style={{position: 'absolute', left: x - w / 2, top: bottom - height, width: w, height}} />
     </>
   );
 };
 
-// 3. The loss: with the smell goes about a third of vitamin E.
-const S3 = () => (
+// --- scenes ---------------------------------------------------------------------------------
+
+const S1 = () => (
   <>
-    <Text lines={['Вместе с запахом', 'уходит около трети', 'витамина E']} />
+    <Head top={300} size={92} lines={['Почему подсолнечное', 'масло из магазина', 'ничем не пахнет?']} />
     <Svg>
-      <Steam x={760} y={980} h={170} w={40} />
-      <VitaminE x={540} y={1150} r={230} parts={2} drift />
-      <Label x={540} y={1470}>витамин E</Label>
+      <ShopBottle x={540} y={1200} />
     </Svg>
   </>
 );
 
-// 4. The alternative: seeds pressed at up to 30 °C, golden oil runs out of the press.
-const S4 = () => (
+const S2 = () => (
   <>
-    <Text lines={['Холодный отжим:', 'семена давят прессом', 'до 30 °C']} />
-    <Svg>
-      <Press x={500} y={860} />
-      <path d="M 500 930 C 504 1010 500 1100 500 1230" stroke="url(#gold)" strokeWidth={14} strokeLinecap="round" fill="none" />
-      <Bowl x={500} y={1240} />
-      <Thermo x={880} y={1080} label="30 °C" color={GOLD_B} />
-    </Svg>
+    <Head top={300} size={92} lines={['Вот 3 причины']} />
+    <div style={{position: 'absolute', top: 470, left: 0, right: 0, textAlign: 'center', fontFamily: FONT.medium, fontSize: 1100, lineHeight: 1, letterSpacing: '-0.06em', color: 'transparent', WebkitTextStroke: `3px ${GOLD}`}}>3</div>
   </>
 );
 
-// 5. What stays: the same bowl as in scene 1, now golden with aroma; vitamin E complete.
-const S5 = () => (
+const Reason: React.FC<{n: number; lines: string[]; icon: React.ReactNode}> = ({n, lines, icon}) => (
   <>
-    <Text lines={['Остаются запах семян', 'и витамин E']} />
-    <Svg>
-      <Aroma x={360} y={1000} s={0.85} />
-      <Bowl x={360} y={1060} />
-      <VitaminE x={800} y={1150} r={150} parts={3} />
-    </Svg>
+    <Ghost>{n}</Ghost>
+    <Overline top={300}>{`Причина ${n} из 3`}</Overline>
+    <Head top={360} lines={lines} />
+    <Svg>{icon}</Svg>
   </>
 );
 
-// 6. The dose: one tablespoon is about a third of the daily norm.
+const S3 = () => <Reason n={1} lines={['Семена прогревают,', 'чтобы выжать', 'больше масла']} icon={<Reason1Icon />} />;
+const S4 = () => <Reason n={2} lines={['Масло очищают', 'и осветляют']} icon={<Reason2Icon />} />;
+const S5 = () => <Reason n={3} lines={['Запах убирают паром', 'при 200 °C и выше']} icon={<Reason3Icon />} />;
+
 const S6 = () => (
   <>
-    <Text lines={['В столовой ложке', 'около трети нормы', 'витамина E']} />
+    <Overline top={300}>Масларада</Overline>
+    <Head top={360} lines={['Сыродавленное масло', 'холодного отжима']} />
     <Svg>
-      <Tablespoon x={300} y={1000} />
-      <VitaminE x={770} y={1050} r={170} parts={1} />
-      <Label x={770} y={1290}>дневная норма</Label>
-      <Label x={770} y={1340}>15 мг</Label>
+      <ellipse cx={540} cy={1200} rx={360} ry={420} fill="url(#glow)" opacity={0.6} />
+    </Svg>
+    <Bottle oil="sun" x={540} bottom={1560} height={930} />
+  </>
+);
+
+const S7 = () => (
+  <>
+    <Overline top={300}>Как его делают</Overline>
+    <Head top={360} lines={['Семена давят прессом', 'при температуре']} />
+    <Figure top={560} size={250}>до 30 °C</Figure>
+    <Sub top={860} lines={['Поэтому масло сохраняет', 'запах семян и мягкий вкус']} />
+    <Svg>
+      <g transform="translate(540 1330)">
+        <SeedLine x={-150} y={0} rot={-90} s={0.9} />
+        <SeedLine x={-50} y={0} rot={-90} s={0.9} />
+        <SeedLine x={50} y={0} rot={-90} s={0.9} />
+        <SeedLine x={150} y={0} rot={-90} s={0.9} />
+        <line x1={-260} y1={-62} x2={260} y2={-62} {...mono(LIGHT)} />
+        <line x1={-260} y1={62} x2={260} y2={62} {...mono(LIGHT)} />
+        <g transform="translate(0 150)">
+          <path d={dropD(110)} fill="url(#gold)" />
+        </g>
+      </g>
     </Svg>
   </>
 );
 
-// 7. Why order here: pressed after the order, on the table in 48 hours.
-const S7 = () => (
+const S8 = () => (
   <>
-    <Text lines={['От заказа до стола', 'за 48 часов']} />
+    <Overline top={300}>Чем богато</Overline>
+    <Head top={360} lines={['Витамином E']} />
     <Svg>
-      <PhoneIcon x={200} y={860} />
-      <line x1={280} y1={860} x2={400} y2={860} stroke={LIGHT.line} strokeOpacity={0.5} strokeWidth={4} strokeDasharray="2 14" strokeLinecap="round" />
-      <Press x={540} y={880} s={0.5} />
-      <line x1={680} y1={860} x2={800} y2={860} stroke={LIGHT.line} strokeOpacity={0.5} strokeWidth={4} strokeDasharray="2 14" strokeLinecap="round" />
-      <BrandBottle x={880} y={890} s={0.62} />
-      <Label x={200} y={1020}>заказ</Label>
-      <Label x={540} y={1020}>отжим</Label>
-      <Label x={880} y={1080}>у вас</Label>
-      <path d="M 150 1120 Q 150 1146 176 1146 L 904 1146 Q 930 1146 930 1120" fill="none" stroke={GOLD_B} strokeWidth={4} strokeLinecap="round" />
-      <Label x={540} y={1210} color={GOLD_B} weight="medium" size={48}>
-        48 часов
-      </Label>
+      {/* typographic fraction: about one third */}
+      <text x={LEFT + 10} y={790} fontFamily={FONT.medium} fontSize={300} letterSpacing="-0.05em" fill={GOLD}>
+        1
+      </text>
+      <line x1={LEFT + 210} y1={900} x2={LEFT + 400} y2={560} stroke={GOLD} strokeWidth={14} strokeLinecap="round" />
+      <text x={LEFT + 380} y={1000} fontFamily={FONT.medium} fontSize={300} letterSpacing="-0.05em" fill={GOLD}>
+        3
+      </text>
     </Svg>
-    <Text top={1300} lines={[]} sub={['Заказывайте на']} />
-    <div style={{position: 'absolute', top: 1376, left: 0, right: 0, textAlign: 'center', fontFamily: FONT.medium, fontSize: TYPE.title.size, letterSpacing: '-0.03em', color: COLORS.ink}}>maslarada.ru</div>
+    <Sub top={1080} size={54} lines={['дневной нормы', 'в одной столовой ложке']} />
+    <Sub top={1290} lines={['Витамин E помогает', 'защищать клетки']} />
+  </>
+);
+
+const S9 = () => (
+  <>
+    <Overline top={300}>Отжим только после заказа</Overline>
+    <Head top={360} lines={['От заказа до стола']} />
+    <Figure top={500} size={520}>
+      48
+    </Figure>
+    <Head top={960} size={84} lines={['часов']} color={GOLD} />
+    <Sub top={1110} lines={['Дата отжима', 'на каждой бутылке']} />
+  </>
+);
+
+const RANGE = ['almond', 'camelina', 'sun', 'thistle', 'pumpkin'];
+const S10 = () => (
+  <>
+    <Sub top={300} size={52} lines={['Заказывайте на']} />
+    <Head top={370} size={120} lines={['maslarada.ru']} />
+    <Svg>
+      <ellipse cx={540} cy={1200} rx={520} ry={360} fill="url(#glow)" />
+    </Svg>
+    {RANGE.map((oil, i) => (
+      <Bottle key={oil} oil={oil} x={140 + i * 200} bottom={1560} height={700} />
+    ))}
   </>
 );
 
@@ -348,10 +294,13 @@ const SCENES: {C: React.FC; theme: Theme}[] = [
   {C: S1, theme: DARK},
   {C: S2, theme: DARK},
   {C: S3, theme: DARK},
-  {C: S4, theme: LIGHT},
-  {C: S5, theme: LIGHT},
+  {C: S4, theme: DARK},
+  {C: S5, theme: DARK},
   {C: S6, theme: LIGHT},
   {C: S7, theme: LIGHT},
+  {C: S8, theme: LIGHT},
+  {C: S9, theme: LIGHT},
+  {C: S10, theme: LIGHT},
 ];
 export const SUN_FRAMES_COUNT = SCENES.length;
 
@@ -359,7 +308,7 @@ export const SunFrames: React.FC = () => {
   const {C, theme} = SCENES[Math.min(useCurrentFrame(), SCENES.length - 1)];
   return (
     <ThemeCtx.Provider value={theme}>
-      <AbsoluteFill style={{background: theme.bg}}>
+      <AbsoluteFill style={{background: theme.bg, overflow: 'hidden'}}>
         <C />
       </AbsoluteFill>
     </ThemeCtx.Provider>
