@@ -422,7 +422,46 @@ const Fraction: React.FC = () => {
   );
 };
 
-const S8 = () => <Benefit title="Витамин E" art={<Fraction />} sound={<Sfx name="clink" at={52} gain={0.7} />} lines={['дневной нормы в одной', 'столовой ложке. Помогает', 'защищать клетки']} />;
+// Vitamin E softgels: translucent golden capsules with an E, popping in and floating.
+const CAPSULES = [
+  {x: 820, y: 700, s: 1.1, r: -24, at: 30},
+  {x: 940, y: 860, s: 0.8, r: 18, at: 38},
+  {x: 790, y: 960, s: 0.95, r: 32, at: 46},
+  {x: 930, y: 1080, s: 0.7, r: -12, at: 54},
+  {x: 960, y: 620, s: 0.6, r: 8, at: 60},
+];
+const Capsules: React.FC = () => {
+  const f = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  return (
+    <g>
+      <defs>
+        <linearGradient id="softgel" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFD873" />
+          <stop offset="0.55" stopColor="#F2B640" />
+          <stop offset="1" stopColor="#C9821A" />
+        </linearGradient>
+      </defs>
+      {CAPSULES.map((c, i) => {
+        const p = spring({frame: f - c.at, fps, config: {damping: 11, stiffness: 120}});
+        const bob = Math.sin(f / 18 + i * 1.3) * 10;
+        return (
+          <g key={i} transform={`translate(${c.x} ${c.y + bob}) rotate(${c.r + Math.sin(f / 26 + i) * 4}) scale(${c.s * p})`} opacity={Math.min(1, p * 1.5)}>
+            <ellipse cx={4} cy={10} rx={92} ry={56} fill="#26170D" opacity={0.08} />
+            <ellipse cx={0} cy={0} rx={92} ry={56} fill="url(#softgel)" />
+            <ellipse cx={0} cy={0} rx={92} ry={56} fill="none" stroke="#B87516" strokeOpacity={0.35} strokeWidth={2} />
+            <ellipse cx={-34} cy={-26} rx={36} ry={12} fill="#fff" opacity={0.55} transform="rotate(-8 -34 -26)" />
+            <text x={0} y={22} textAnchor="middle" fontFamily={FONT.medium} fontSize={64} fill="#fff" opacity={0.95}>
+              E
+            </text>
+          </g>
+        );
+      })}
+    </g>
+  );
+};
+
+const S8 = () => <Benefit title="Витамин E" art={<><Fraction /><Capsules /></>} sound={<Sfx name="clink" at={52} gain={0.7} />} lines={['дневной нормы в одной', 'столовой ложке. Помогает', 'защищать клетки']} />;
 
 const LecithinArt: React.FC = () => {
   const f = useCurrentFrame();
@@ -440,40 +479,39 @@ const LecithinArt: React.FC = () => {
 };
 const S8b = () => <Benefit title="Лецитин" art={<LecithinArt />} lines={['При рафинации его удаляют', 'почти полностью.', 'В холодном отжиме он остаётся']} />;
 
-const AromaArt: React.FC = () => {
+const S8c = () => {
   const f = useCurrentFrame();
-  const g = useLine(GOLD, 8);
-  const thin = useLine(GOLD, 5);
-  const curl = useLine(GOLD, 7);
+  const {fps} = useVideoConfig();
+  const ph = spring({frame: f - 16, fps, config: {damping: 20, stiffness: 80}});
   return (
-    <g>
-      <g transform="translate(330 900) rotate(-18)">
-        <path d="M 0 -170 C 80 -126 92 60 0 170 C -92 60 -80 -126 0 -170 Z" {...g} />
-        <path d="M -24 -98 C -28 -22 -28 48 -12 108 M 24 -98 C 28 -22 28 48 12 108" {...thin} strokeOpacity={0.55} />
-      </g>
-      {[0, 1, 2].map((k) => (
-        <path key={k} d={`M ${560 + k * 90} 1000 c -40 -36 40 -72 0 -108 c -40 -36 36 -66 8 -100 c -16 -20 4 -36 22 -26`} transform={`translate(${Math.sin(f / 14 + k) * 6} ${-Math.sin(f / 22 + k) * 6})`} {...curl} opacity={0.6 + k * 0.2} />
-      ))}
-    </g>
+    <>
+      <Overline top={300}>Что содержится в масле</Overline>
+      <Head top={H} size={110} lines={['Запах и вкус', 'семян']} />
+      {/* photo across the full width, sliding up into place */}
+      <div style={{position: 'absolute', left: 0, top: 690, width: 1080, height: 719, overflow: 'hidden', opacity: Math.min(1, ph * 1.5), transform: `translateY(${(1 - ph) * 120}px)`}}>
+        <Img src={staticFile('photo/seeds_oil.jpg')} style={{width: 1080, height: 719, transform: `scale(${1.06 - 0.06 * ramp(f, 16, 110, Easing.linear)})`}} />
+      </div>
+      <Sub top={1440} size={54} at={44} lines={['Рафинация убирает их паром.', 'Холодный отжим сохраняет']} />
+      <Sfx name="tap" at={6} gain={0.5} />
+    </>
   );
 };
-const S8c = () => <Benefit title="Запах и вкус семян" art={<AromaArt />} lines={['Рафинация убирает их паром.', 'Холодный отжим сохраняет']} />;
 
 const S9 = () => {
   const f = useCurrentFrame();
   return (
     <>
-      <Overline top={300}>Чего в масле нет</Overline>
-      <Head top={H} size={110} lines={['Трансжиров']} />
-      <Figure top={620} size={200} at={18} color="#B9AFA4">
+      <Overline top={300}>Холодный отжим</Overline>
+      <Head top={H} size={110} lines={['Не содержит', 'трансжиров']} />
+      <Figure top={700} size={200} at={18} color="#B9AFA4">
         <Count to={200} at={20} dur={26} /> °C
       </Figure>
-      <Sub top={830} at={34} lines={['при рафинации паром', 'в масле образуются трансжиры']} />
-      <div style={{position: 'absolute', top: 1010, left: LEFT, width: (1080 - LEFT * 2) * ramp(f, 54, 74), height: 2, background: 'rgba(38,23,13,0.1)'}} />
-      <Figure top={1070} size={200} at={64}>
+      <Sub top={910} at={34} lines={['при рафинации паром', 'в масле образуются трансжиры']} />
+      <div style={{position: 'absolute', top: 1080, left: LEFT, width: (1080 - LEFT * 2) * ramp(f, 54, 74), height: 2, background: 'rgba(38,23,13,0.1)'}} />
+      <Figure top={1130} size={200} at={64}>
         <Count to={30} at={66} dur={20} /> °C
       </Figure>
-      <Sub top={1280} at={80} lines={['при холодном отжиме', 'они не образуются']} />
+      <Sub top={1340} at={80} lines={['при холодном отжиме', 'они не образуются']} />
       <Sfx name="tap" at={6} gain={0.5} />
       <Sfx name="clink" at={86} gain={0.7} />
     </>
@@ -537,20 +575,32 @@ const SCENES: Scene[] = [
   {C: S11, theme: LIGHT, dur: 130},
 ];
 
-const Frame: React.FC<{s: Scene}> = ({s}) => (
-  <ThemeCtx.Provider value={s.theme}>
-    <AbsoluteFill style={{background: s.theme.bg, overflow: 'hidden'}}>
-      <s.C />
-    </AbsoluteFill>
-  </ThemeCtx.Provider>
-);
+// During a transition the background stays put (no dark bars): only the content lifts and fades.
+type Motion = {bg: number; content: number; y: number};
+const MotionCtx = React.createContext<Motion>({bg: 1, content: 1, y: 0});
 
-// Calm change between screens: the old one lifts away and fades, the new one rises in.
+const Frame: React.FC<{s: Scene}> = ({s}) => {
+  const m = React.useContext(MotionCtx);
+  return (
+    <ThemeCtx.Provider value={s.theme}>
+      <AbsoluteFill style={{background: s.theme.bg, opacity: m.bg}} />
+      <AbsoluteFill style={{overflow: 'hidden', opacity: m.content, transform: `translateY(${m.y}px)`}}>
+        <s.C />
+      </AbsoluteFill>
+    </ThemeCtx.Provider>
+  );
+};
+
+// The outgoing screen keeps its background while its content lifts away; the incoming background
+// fades in over it (invisible between two white screens) and its content rises into place.
 const LiftView: React.FC<TransitionPresentationComponentProps<Record<string, never>>> = ({children, presentationDirection, presentationProgress}) => {
   const p = Easing.bezier(0.45, 0, 0.2, 1)(presentationProgress);
-  const entering = presentationDirection === 'entering';
-  const style: React.CSSProperties = entering ? {opacity: p, transform: `translateY(${(1 - p) * 60}px)`} : {opacity: 1 - p, transform: `translateY(${-p * 40}px)`};
-  return <AbsoluteFill style={style}>{children}</AbsoluteFill>;
+  const m: Motion = presentationDirection === 'entering' ? {bg: p, content: p, y: (1 - p) * 60} : {bg: 1, content: 1 - p, y: -p * 40};
+  return (
+    <AbsoluteFill>
+      <MotionCtx.Provider value={m}>{children}</MotionCtx.Provider>
+    </AbsoluteFill>
+  );
 };
 const lift = (): TransitionPresentation<Record<string, never>> => ({component: LiftView, props: {}});
 const FX = 16;
