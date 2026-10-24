@@ -204,19 +204,22 @@ const S2 = () => (
   </>
 );
 
-const Step: React.FC<{n: number; lines: string[]; icon: React.ReactNode}> = ({n, lines, icon}) => (
+// Overline sits 100 px above the headline: a clear gap, not glued to it.
+const H = 400;
+
+const Step: React.FC<{n: number; name: string; lines: string[]; icon: React.ReactNode}> = ({n, name, lines, icon}) => (
   <>
     <Ghost>{n}</Ghost>
-    <Overline top={300}>{`Этап ${n} из 4`}</Overline>
-    <Head top={360} lines={lines} />
+    <Overline top={300}>{name}</Overline>
+    <Head top={H} lines={lines} />
     <Svg>{icon}</Svg>
   </>
 );
 
-const S3 = () => <Step n={1} lines={['Семена жарят,', 'чтобы выжать', 'больше масла']} icon={<Reason1Icon />} />;
-const S4 = () => <Step n={2} lines={['Масло обрабатывают', 'щёлочью']} icon={<FlaskIcon />} />;
-const S5 = () => <Step n={3} lines={['Масло отбеливают,', 'чтобы убрать цвет']} icon={<Reason2Icon />} />;
-const S5b = () => <Step n={4} lines={['Пропаривают', 'при 200\u00a0°C и выше,', 'чтобы убрать', 'запах и вкус']} icon={<Reason3Icon />} />;
+const S3 = () => <Step n={1} name="Жарка" lines={['Семена жарят,', 'чтобы выжать', 'больше масла']} icon={<Reason1Icon />} />;
+const S4 = () => <Step n={2} name="Нейтрализация" lines={['Масло обрабатывают', 'щёлочью']} icon={<FlaskIcon />} />;
+const S5 = () => <Step n={3} name="Отбеливание" lines={['Масло отбеливают,', 'чтобы убрать цвет']} icon={<Reason2Icon />} />;
+const S5b = () => <Step n={4} name="Дезодорация" lines={['Пропаривают', 'при 200 °C и выше,', 'чтобы убрать', 'запах и вкус']} icon={<Reason3Icon />} />;
 
 // What reaches the shelf: four losses, each with a red cross.
 const LossRow: React.FC<{y: number; title: string; note: string; first?: boolean}> = ({y, title, note, first}) => (
@@ -233,34 +236,36 @@ const LossRow: React.FC<{y: number; title: string; note: string; first?: boolean
 
 const S5c = () => (
   <>
-    <Overline top={300}>Итог рафинации</Overline>
-    <Head top={360} lines={['Что попадает', 'на полку']} />
-    <LossRow first y={640} title="Ни запаха, ни вкуса" note="их убирают паром специально" />
-    <LossRow y={870} title="Витамина E на треть меньше" note="теряется при очистке и пропаривании" />
-    <LossRow y={1100} title="Лецитин удалён" note="его убирают почти полностью" />
-    <LossRow y={1330} title="Появляются трансжиры" note="при нагреве выше 200 °C" />
+    <Overline top={300}>Что в итоге</Overline>
+    <Head top={H} lines={['Какое масло продают', 'в магазинах']} />
+    <LossRow first y={680} title="Ни запаха, ни вкуса" note="их убирают паром специально" />
+    <LossRow y={910} title="Витамина E на треть меньше" note="теряется при рафинации" />
+    <LossRow y={1140} title="Лецитин удалён" note="его убирают почти полностью" />
+    <LossRow y={1370} title="Появляются трансжиры" note="при нагреве выше 200 °C" />
   </>
 );
 
+// First white screen: the turn to the real benefit, with our bottle.
 const S6 = () => (
   <>
     <Overline top={300}>Масларада</Overline>
-    <Head top={360} lines={['Сыродавленное', 'подсолнечное масло', 'холодного отжима']} />
+    <Head top={H} lines={['В чём настоящая', 'польза', 'сыродавленного масла']} />
+    <Sub top={H + 290} lines={['подсолнечное, холодного отжима']} />
     <Svg>
-      <ellipse cx={540} cy={1240} rx={340} ry={380} fill="url(#glow)" opacity={0.6} />
+      <ellipse cx={540} cy={1260} rx={340} ry={360} fill="url(#glow)" opacity={0.6} />
     </Svg>
-    <Bottle oil="sun" x={540} bottom={1560} height={840} />
+    <Bottle oil="sun" x={540} bottom={1570} height={720} />
   </>
 );
 
 const S7 = () => (
   <>
     <Overline top={300}>Как его делают</Overline>
-    <Head top={360} lines={['Семена давят прессом', 'при температуре']} />
-    <Figure top={560} size={250}>до 30 °C</Figure>
-    <Sub top={860} lines={['Без жарки, щёлочи,', 'отбеливания и пара']} size={56} />
+    <Head top={H} lines={['Очищенные семена', 'давят прессом', 'при температуре']} />
+    <Figure top={H + 280} size={250}>до 30 °C</Figure>
+    <Sub top={H + 560} size={56} lines={['Без жарки, щёлочи,', 'отбеливания и пара']} />
     <Svg>
-      <g transform="translate(540 1330)">
+      <g transform="translate(540 1400)">
         <SeedLine x={-150} y={0} rot={-90} s={0.9} />
         <SeedLine x={-50} y={0} rot={-90} s={0.9} />
         <SeedLine x={50} y={0} rot={-90} s={0.9} />
@@ -275,80 +280,92 @@ const S7 = () => (
   </>
 );
 
-// A row of a spec list: gold icon, title, one explaining line, hairline divider above.
-const Row: React.FC<{y: number; icon: React.ReactNode; title: string; note: string; first?: boolean}> = ({y, icon, title, note, first}) => (
+// One benefit per screen: name, a big gold sign, two short lines.
+const Benefit: React.FC<{overline?: string; title: string; art: React.ReactNode; lines: string[]; linesTop?: number}> = ({overline = 'Что содержится в масле', title, art, lines, linesTop = 1180}) => (
   <>
-    {first ? null : <div style={{position: 'absolute', top: y - 40, left: LEFT, right: LEFT, height: 2, background: 'rgba(38,23,13,0.1)'}} />}
-    <svg width={120} height={120} viewBox="-60 -60 120 120" style={{position: 'absolute', left: LEFT - 20, top: y - 10}}>
-      {icon}
-    </svg>
-    <div style={{position: 'absolute', top: y, left: LEFT + 130, right: LEFT, fontFamily: FONT.medium, fontSize: 60, lineHeight: 1.05, letterSpacing: '-0.025em', color: COLORS.ink}}>{title}</div>
-    <div style={{position: 'absolute', top: y + 78, left: LEFT + 130, right: LEFT - 20, fontFamily: FONT.regular, fontSize: 40, lineHeight: 1.22, color: LIGHT.sub}}>{note}</div>
+    <Overline top={300}>{overline}</Overline>
+    <Head top={H} size={110} lines={[title]} />
+    <Svg>{art}</Svg>
+    <Sub top={linesTop} size={54} lines={lines} />
   </>
 );
 
-const iconStroke = {fill: 'none', stroke: GOLD, strokeWidth: 5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const};
+const goldStroke = {fill: 'none', stroke: GOLD, strokeWidth: 8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const};
 
 const S8 = () => (
+  <Benefit
+    title="Витамин E"
+    art={
+      <g>
+        <text x={LEFT + 10} y={870} fontFamily={FONT.medium} fontSize={300} letterSpacing="-0.05em" fill={GOLD}>
+          1
+        </text>
+        <line x1={LEFT + 210} y1={980} x2={LEFT + 400} y2={640} stroke={GOLD} strokeWidth={14} strokeLinecap="round" />
+        <text x={LEFT + 380} y={1080} fontFamily={FONT.medium} fontSize={300} letterSpacing="-0.05em" fill={GOLD}>
+          3
+        </text>
+      </g>
+    }
+    lines={['дневной нормы в одной', 'столовой ложке. Помогает', 'защищать клетки']}
+  />
+);
+
+const S8b = () => (
+  <Benefit
+    title="Лецитин"
+    art={
+      <g transform="translate(330 860)" {...goldStroke}>
+        <circle cx={-60} cy={-50} r={80} />
+        <circle cx={110} cy={-10} r={60} />
+        <circle cx={10} cy={120} r={70} />
+        <line x1={-4} y1={-20} x2={58} y2={-14} />
+        <line x1={-30} y1={26} x2={-12} y2={58} />
+        <line x1={84} y1={44} x2={60} y2={72} />
+      </g>
+    }
+    lines={['При рафинации его удаляют', 'почти полностью.', 'В холодном отжиме он остаётся']}
+  />
+);
+
+const S8c = () => (
+  <Benefit
+    title="Запах и вкус семян"
+    art={
+      <g>
+        <g transform="translate(330 900) rotate(-18)" {...goldStroke}>
+          <path d="M 0 -170 C 80 -126 92 60 0 170 C -92 60 -80 -126 0 -170 Z" />
+          <path d="M -24 -98 C -28 -22 -28 48 -12 108 M 24 -98 C 28 -22 28 48 12 108" strokeWidth={5} strokeOpacity={0.55} />
+        </g>
+        {[0, 1, 2].map((k) => (
+          <path key={k} d={`M ${560 + k * 90} 1000 c -40 -36 40 -72 0 -108 c -40 -36 36 -66 8 -100 c -16 -20 4 -36 22 -26`} {...goldStroke} strokeWidth={7} opacity={0.6 + k * 0.2} />
+        ))}
+      </g>
+    }
+    lines={['Рафинация убирает их паром.', 'Холодный отжим сохраняет']}
+  />
+);
+
+const S9 = () => (
   <>
-    <Overline top={300}>Чем оно богато</Overline>
-    <Head top={360} lines={['Что остаётся в масле']} />
-    <Row
-      first
-      y={580}
-      title="Витамин E"
-      note="около трети дневной нормы в столовой ложке, помогает защищать клетки"
-      icon={
-        <g>
-          <circle r={40} {...iconStroke} />
-          <text y={17} textAnchor="middle" fontFamily={FONT.medium} fontSize={48} fill={GOLD}>
-            E
-          </text>
-        </g>
-      }
-    />
-    <Row
-      y={830}
-      title="Лецитин"
-      note="при рафинации его удаляют почти полностью"
-      icon={
-        <g {...iconStroke}>
-          <circle cx={-16} cy={-14} r={16} />
-          <circle cx={20} cy={-6} r={12} />
-          <circle cx={-2} cy={24} r={14} />
-        </g>
-      }
-    />
-    <Row
-      y={1080}
-      title="Запах и вкус семян"
-      note="рафинация убирает их, холодный отжим сохраняет"
-      icon={
-        <g {...iconStroke}>
-          <path d="M 0 -42 C 20 -31 23 15 0 42 C -23 15 -20 -31 0 -42 Z" />
-          <path d="M -6 -24 C -7 -5 -7 12 -3 27 M 6 -24 C 7 -5 7 12 3 27" strokeWidth={3} strokeOpacity={0.6} />
-        </g>
-      }
-    />
-    <Row
-      y={1330}
-      title="Без трансжиров от нагрева"
-      note="при отжиме до 30 °C они не образуются"
-      icon={
-        <g {...iconStroke}>
-          <circle r={40} />
-          <path d="M -18 0 L -5 13 L 20 -14" />
-        </g>
-      }
-    />
+    <Overline top={300}>Чего в масле нет</Overline>
+    <Head top={H} size={110} lines={['Трансжиров']} />
+    <Figure top={620} size={200}>
+      <span style={{color: '#B9AFA4'}}>200 °C</span>
+    </Figure>
+    <Sub top={830} lines={['при рафинации паром', 'в масле образуются трансжиры']} />
+    <div style={{position: 'absolute', top: 1010, left: LEFT, right: LEFT, height: 2, background: 'rgba(38,23,13,0.1)'}} />
+    <Figure top={1070} size={200}>
+      30 °C
+    </Figure>
+    <Sub top={1280} lines={['при холодном отжиме', 'они не образуются']} />
   </>
 );
 
 const S10 = () => (
   <>
     <Overline top={300}>Отжим только после заказа</Overline>
-    <Head top={360} lines={['От заказа до стола']} />
-    <Figure top={470} size={230}>
+    <Head top={H} lines={['От заказа до стола']} />
+    <Figure top={H + 110} size={230}>
       48 часов
     </Figure>
     {/* full photo, uncropped, flush with the sides and the bottom */}
@@ -383,6 +400,9 @@ const SCENES: {C: React.FC; theme: Theme}[] = [
   {C: S6, theme: LIGHT},
   {C: S7, theme: LIGHT},
   {C: S8, theme: LIGHT},
+  {C: S8b, theme: LIGHT},
+  {C: S8c, theme: LIGHT},
+  {C: S9, theme: LIGHT},
   {C: S10, theme: LIGHT},
   {C: S11, theme: LIGHT},
 ];
