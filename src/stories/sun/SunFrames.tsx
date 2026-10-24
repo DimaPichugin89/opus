@@ -328,7 +328,9 @@ const S10 = () => (
     <Figure top={470} size={230}>
       48 часов
     </Figure>
-    <Img src={staticFile('photo/nabor2.jpg')} style={{position: 'absolute', left: 64, top: 790, width: 952, height: 770, objectFit: 'cover', objectPosition: '30% 50%', borderRadius: 28}} />
+    {/* full photo, uncropped, flush with the sides and the bottom */}
+    <Img src={staticFile('photo/nabor2.jpg')} style={{position: 'absolute', left: 0, bottom: 0, width: 1080, height: 810}} />
+    <div style={{position: 'absolute', left: 0, right: 0, top: 1110, height: 140, background: 'linear-gradient(#FFFFFF, rgba(255,255,255,0))'}} />
   </>
 );
 
@@ -338,11 +340,12 @@ const S11 = () => (
     <Sub top={300} size={52} lines={['Заказывайте на']} />
     <Head top={370} size={120} lines={['maslarada.ru']} />
     <Svg>
-      <ellipse cx={540} cy={1200} rx={520} ry={360} fill="url(#glow)" />
+      <ellipse cx={540} cy={1060} rx={520} ry={340} fill="url(#glow)" />
     </Svg>
     {RANGE.map((oil, i) => (
-      <Bottle key={oil} oil={oil} x={140 + i * 200} bottom={1560} height={700} />
+      <Bottle key={oil} oil={oil} x={140 + i * 200} bottom={1370} height={640} />
     ))}
+    <Sub top={1430} size={50} lines={['10 сыродавленных масел', 'из разных культур']} />
   </>
 );
 
