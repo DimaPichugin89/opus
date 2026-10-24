@@ -185,9 +185,11 @@ const Bottle: React.FC<{oil: string; x: number; bottom: number; height: number}>
 
 const S1 = () => (
   <>
-    <Head top={300} size={92} lines={['Почему подсолнечное', 'масло из магазина', 'ничем не пахнет?']} />
+    <Head top={300} size={80} lines={['Почему подсолнечное', 'масло из магазина', 'ничем не пахнет', 'и не имеет вкуса?']} />
     <Svg>
-      <ShopBottle x={540} y={1200} />
+      <g transform="translate(540 1270) scale(0.85)">
+        <ShopBottle x={0} y={0} />
+      </g>
     </Svg>
   </>
 );
@@ -210,7 +212,7 @@ const Reason: React.FC<{n: number; lines: string[]; icon: React.ReactNode}> = ({
 
 const S3 = () => <Reason n={1} lines={['Семена прогревают,', 'чтобы выжать', 'больше масла']} icon={<Reason1Icon />} />;
 const S4 = () => <Reason n={2} lines={['Масло очищают', 'и осветляют']} icon={<Reason2Icon />} />;
-const S5 = () => <Reason n={3} lines={['Запах убирают паром', 'при 200 °C и выше']} icon={<Reason3Icon />} />;
+const S5 = () => <Reason n={3} lines={['Запах и вкус убирают', 'паром при 200 °C', 'и выше']} icon={<Reason3Icon />} />;
 
 const S6 = () => (
   <>
