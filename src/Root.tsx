@@ -13,6 +13,7 @@ import {Reel, REEL_FRAMES} from './stories/reel/Reel';
 import {SunReel, SUN_FRAMES} from './stories/sun/SunReel';
 import {SunInfo, SUN_INFO_FRAMES} from './stories/sun/SunInfo';
 import {SunCold, SUN_COLD_FRAMES, SunFrames, SUN_FRAMES_COUNT} from './stories/sun/SunFrames';
+import {ByOrder, BY_ORDER_FRAMES, ByOrderFrames, BY_ORDER_STILLS} from './stories/order/ByOrder';
 import {FPS, H, W} from './theme';
 
 loadFonts();
@@ -24,6 +25,8 @@ const STORIES = [
   {id: 'SunInfo', component: SunInfo, frames: SUN_INFO_FRAMES},
   {id: 'SunFrames', component: SunFrames, frames: SUN_FRAMES_COUNT},
   {id: 'SunCold', component: SunCold, frames: SUN_COLD_FRAMES},
+  {id: 'ByOrder', component: ByOrder, frames: BY_ORDER_FRAMES},
+  {id: 'ByOrderFrames', component: ByOrderFrames, frames: BY_ORDER_STILLS},
   {id: 'General01', component: G1, frames: G1_FRAMES},
   {id: 'General02', component: G2, frames: G2_FRAMES},
   {id: 'General03', component: G3, frames: G3_FRAMES},

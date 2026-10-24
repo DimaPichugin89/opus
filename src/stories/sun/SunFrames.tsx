@@ -7,30 +7,30 @@ import {linearTiming, TransitionPresentation, TransitionPresentationComponentPro
 import {MixGain, Sfx} from '../../sfx';
 import {COLORS, FONT} from '../../theme';
 
-type Theme = {bg: string; text: string; sub: string; line: string; ghost: string};
-const LIGHT: Theme = {bg: '#FFFFFF', text: COLORS.ink, sub: '#8A7868', line: COLORS.ink, ghost: 'rgba(38,23,13,0.035)'};
-const DARK: Theme = {bg: '#0D0B09', text: '#F5F1EA', sub: '#9A938A', line: '#EDE7DD', ghost: 'rgba(255,255,255,0.045)'};
-const ThemeCtx = React.createContext(LIGHT);
-const useTheme = () => React.useContext(ThemeCtx);
+export type Theme = {bg: string; text: string; sub: string; line: string; ghost: string};
+export const LIGHT: Theme = {bg: '#FFFFFF', text: COLORS.ink, sub: '#8A7868', line: COLORS.ink, ghost: 'rgba(38,23,13,0.035)'};
+export const DARK: Theme = {bg: '#0D0B09', text: '#F5F1EA', sub: '#9A938A', line: '#EDE7DD', ghost: 'rgba(255,255,255,0.045)'};
+export const ThemeCtx = React.createContext(LIGHT);
+export const useTheme = () => React.useContext(ThemeCtx);
 
-const GOLD = '#C9821A';
-const GOLD_L = '#F2B640';
-const LEFT = 96;
-const H = 400; // headline top; the overline sits 100 px above it
+export const GOLD = '#C9821A';
+export const GOLD_L = '#F2B640';
+export const LEFT = 96;
+export const H = 400; // headline top; the overline sits 100 px above it
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
-const OUT = Easing.bezier(0.16, 1, 0.3, 1);
-const ramp = (f: number, a: number, b: number, e = OUT) => interpolate(f, [a, b], [0, 1], {...clamp, easing: e});
+export const OUT = Easing.bezier(0.16, 1, 0.3, 1);
+export const ramp = (f: number, a: number, b: number, e = OUT) => interpolate(f, [a, b], [0, 1], {...clamp, easing: e});
 
 // --- type: everything enters on its own beat --------------------------------------------------
 
-const Overline: React.FC<{top: number; at?: number; children: React.ReactNode}> = ({top, at = 2, children}) => {
+export const Overline: React.FC<{top: number; at?: number; children: React.ReactNode}> = ({top, at = 2, children}) => {
   const p = ramp(useCurrentFrame(), at, at + 14);
   return <div style={{position: 'absolute', top, left: LEFT, fontFamily: FONT.medium, fontSize: 38, letterSpacing: '0.01em', color: GOLD, opacity: p, transform: `translateY(${(1 - p) * 16}px)`}}>{children}</div>;
 };
 
 // Each line rises out of its own mask.
-const Head: React.FC<{top: number; lines: string[]; size?: number; color?: string; at?: number}> = ({top, lines, size = 84, color, at = 6}) => {
+export const Head: React.FC<{top: number; lines: string[]; size?: number; color?: string; at?: number}> = ({top, lines, size = 84, color, at = 6}) => {
   const t = useTheme();
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
@@ -48,7 +48,7 @@ const Head: React.FC<{top: number; lines: string[]; size?: number; color?: strin
   );
 };
 
-const Sub: React.FC<{top: number; lines: string[]; size?: number; at?: number}> = ({top, lines, size = 46, at = 22}) => {
+export const Sub: React.FC<{top: number; lines: string[]; size?: number; at?: number}> = ({top, lines, size = 46, at = 22}) => {
   const t = useTheme();
   const f = useCurrentFrame();
   return (
@@ -66,7 +66,7 @@ const Sub: React.FC<{top: number; lines: string[]; size?: number; at?: number}> 
 };
 
 // Huge background numeral, cropped by the frame edge; it drifts in slowly.
-const Ghost: React.FC<{children: React.ReactNode; right?: number; bottom?: number; size?: number}> = ({children, right = -60, bottom = 120, size = 1250}) => {
+export const Ghost: React.FC<{children: React.ReactNode; right?: number; bottom?: number; size?: number}> = ({children, right = -60, bottom = 120, size = 1250}) => {
   const t = useTheme();
   const f = useCurrentFrame();
   const p = ramp(f, 0, 40);
@@ -74,7 +74,7 @@ const Ghost: React.FC<{children: React.ReactNode; right?: number; bottom?: numbe
 };
 
 // Big gold figure for the key numbers.
-const Figure: React.FC<{top: number; children: React.ReactNode; size?: number; at?: number; color?: string}> = ({top, children, size = 330, at = 16, color = GOLD}) => {
+export const Figure: React.FC<{top: number; children: React.ReactNode; size?: number; at?: number; color?: string}> = ({top, children, size = 330, at = 16, color = GOLD}) => {
   const p = ramp(useCurrentFrame(), at, at + 18);
   return (
     <div style={{position: 'absolute', top, left: LEFT - 12, fontFamily: FONT.medium, fontSize: size, lineHeight: 0.9, letterSpacing: '-0.055em', color, whiteSpace: 'nowrap', fontFeatureSettings: '"tnum"', opacity: p, transform: `translateY(${(1 - p) * 40}px)`}}>
@@ -83,25 +83,25 @@ const Figure: React.FC<{top: number; children: React.ReactNode; size?: number; a
   );
 };
 
-const Count: React.FC<{to: number; at: number; dur?: number}> = ({to, at, dur = 30}) => <>{Math.round(to * ramp(useCurrentFrame(), at, at + dur, Easing.bezier(0.25, 0.1, 0.25, 1)))}</>;
+export const Count: React.FC<{to: number; at: number; dur?: number}> = ({to, at, dur = 30}) => <>{Math.round(to * ramp(useCurrentFrame(), at, at + dur, Easing.bezier(0.25, 0.1, 0.25, 1)))}</>;
 
 // --- drawing: strokes draw themselves on, fills follow -------------------------------------------
 
 const DrawCtx = React.createContext(1);
-const Draw: React.FC<{at: number; dur?: number; children: React.ReactNode}> = ({at, dur = 30, children}) => (
+export const Draw: React.FC<{at: number; dur?: number; children: React.ReactNode}> = ({at, dur = 30, children}) => (
   <DrawCtx.Provider value={ramp(useCurrentFrame(), at, at + dur, Easing.bezier(0.45, 0, 0.2, 1))}>{children}</DrawCtx.Provider>
 );
-const STROKE = 4;
+export const STROKE = 4;
 // Stroke props for one element, including the draw-on dash; spread it on every drawn element.
-const useLine = (color?: string, width = STROKE) => {
+export const useLine = (color?: string, width = STROKE) => {
   const t = useTheme();
   const p = React.useContext(DrawCtx);
   return {fill: 'none', stroke: color ?? t.line, strokeWidth: width, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, pathLength: 1, strokeDasharray: 1, strokeDashoffset: 1 - p};
 };
 // Fills come in during the last part of the draw.
-const useFill = () => interpolate(React.useContext(DrawCtx), [0.55, 1], [0, 1], clamp);
+export const useFill = () => interpolate(React.useContext(DrawCtx), [0.55, 1], [0, 1], clamp);
 
-const Svg: React.FC<{children: React.ReactNode}> = ({children}) => (
+export const Svg: React.FC<{children: React.ReactNode}> = ({children}) => (
   <svg width={1080} height={1920} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0}}>
     <defs>
       <linearGradient id="gold" x1="0.2" y1="0" x2="0.8" y2="1">
@@ -121,7 +121,7 @@ const Svg: React.FC<{children: React.ReactNode}> = ({children}) => (
   </svg>
 );
 
-const Glow: React.FC<{cx: number; cy: number; r: number; opacity?: number}> = ({cx, cy, r, opacity = 1}) => {
+export const Glow: React.FC<{cx: number; cy: number; r: number; opacity?: number}> = ({cx, cy, r, opacity = 1}) => {
   const f = useCurrentFrame();
   const p = ramp(f, 0, 40);
   return <circle cx={cx} cy={cy} r={r * (0.9 + 0.1 * p) * (1 + 0.02 * Math.sin(f / 20))} fill="url(#glow)" opacity={p * opacity} />;
@@ -129,7 +129,7 @@ const Glow: React.FC<{cx: number; cy: number; r: number; opacity?: number}> = ({
 
 // --- icons ---------------------------------------------------------------------------------------
 
-const SeedLine: React.FC<{x: number; y: number; rot: number; s?: number}> = ({x, y, rot, s = 1}) => {
+export const SeedLine: React.FC<{x: number; y: number; rot: number; s?: number}> = ({x, y, rot, s = 1}) => {
   const a = useLine();
   const b = useLine(undefined, 3);
   return (
@@ -180,7 +180,7 @@ const FlaskIcon: React.FC = () => {
   );
 };
 
-const dropD = (h: number) => {
+export const dropD = (h: number) => {
   const r = h / 2.7;
   return `M 0 ${-h} C ${r * 0.25} ${-h + r * 0.65} ${r} ${-r * 1.45} ${r} ${-r * 0.95} A ${r} ${r} 0 1 1 ${-r} ${-r * 0.95} C ${-r} ${-r * 1.45} ${-r * 0.25} ${-h + r * 0.65} 0 ${-h} Z`;
 };
@@ -244,7 +244,7 @@ const SteamIcon: React.FC = () => {
 };
 
 // Product cutout on a soft contact shadow; rises in at `at`.
-const Bottle: React.FC<{oil: string; x: number; bottom: number; height: number; at?: number}> = ({oil, x, bottom, height, at = 10}) => {
+export const Bottle: React.FC<{oil: string; x: number; bottom: number; height: number; at?: number}> = ({oil, x, bottom, height, at = 10}) => {
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
   const p = spring({frame: f - at, fps, config: {damping: 18, stiffness: 90}});
@@ -598,7 +598,7 @@ const S11 = () => {
   );
 };
 
-type Scene = {C: React.FC; theme: Theme; dur: number};
+export type Scene = {C: React.FC; theme: Theme; dur: number};
 const SCENES: Scene[] = [
   {C: S1, theme: DARK, dur: 120},
   {C: S2, theme: DARK, dur: 105},
@@ -621,7 +621,7 @@ const SCENES: Scene[] = [
 type Motion = {bg: number; content: number; y: number};
 const MotionCtx = React.createContext<Motion>({bg: 1, content: 1, y: 0});
 
-const Frame: React.FC<{s: Scene}> = ({s}) => {
+export const Frame: React.FC<{s: Scene}> = ({s}) => {
   const m = React.useContext(MotionCtx);
   return (
     <ThemeCtx.Provider value={s.theme}>
@@ -644,25 +644,32 @@ const LiftView: React.FC<TransitionPresentationComponentProps<Record<string, nev
     </AbsoluteFill>
   );
 };
-const lift = (): TransitionPresentation<Record<string, never>> => ({component: LiftView, props: {}});
-const FX = 16;
+export const lift = (): TransitionPresentation<Record<string, never>> => ({component: LiftView, props: {}});
+export const FX = 16;
 
-export const SUN_COLD_FRAMES = SCENES.reduce((sum, s) => sum + s.dur, 0) - FX * (SCENES.length - 1);
+export const reelFrames = (scenes: Scene[]) => scenes.reduce((sum, s) => sum + s.dur, 0) - FX * (scenes.length - 1);
+
+// Screens one after another with the calm lift between them.
+export const ReelSeries: React.FC<{scenes: Scene[]}> = ({scenes}) => (
+  <AbsoluteFill style={{background: DARK.bg}}>
+    <TransitionSeries>
+      {scenes.map((s, i) => (
+        <React.Fragment key={i}>
+          <TransitionSeries.Sequence durationInFrames={s.dur}>
+            <Frame s={s} />
+          </TransitionSeries.Sequence>
+          {i < scenes.length - 1 ? <TransitionSeries.Transition presentation={lift()} timing={linearTiming({durationInFrames: FX})} /> : null}
+        </React.Fragment>
+      ))}
+    </TransitionSeries>
+  </AbsoluteFill>
+);
+
+export const SUN_COLD_FRAMES = reelFrames(SCENES);
 
 export const SunCold: React.FC = () => (
   <MixGain.Provider value={1.4}>
-    <AbsoluteFill style={{background: DARK.bg}}>
-      <TransitionSeries>
-        {SCENES.map((s, i) => (
-          <React.Fragment key={i}>
-            <TransitionSeries.Sequence durationInFrames={s.dur}>
-              <Frame s={s} />
-            </TransitionSeries.Sequence>
-            {i < SCENES.length - 1 ? <TransitionSeries.Transition presentation={lift()} timing={linearTiming({durationInFrames: FX})} /> : null}
-          </React.Fragment>
-        ))}
-      </TransitionSeries>
-    </AbsoluteFill>
+    <ReelSeries scenes={SCENES} />
   </MixGain.Provider>
 );
 
