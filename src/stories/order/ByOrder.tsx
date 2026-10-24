@@ -224,7 +224,6 @@ const Calendar: React.FC<{x: number; y: number}> = ({x, y}) => {
 const FreshArt: React.FC = () => {
   const f = useCurrentFrame();
   const arrow = ramp(f, 40, 56);
-  const fill = ramp(f, 52, 96, Easing.bezier(0.33, 0, 0.2, 1));
   return (
     <g>
       <Glow cx={540} cy={940} r={420} />
@@ -233,7 +232,6 @@ const FreshArt: React.FC = () => {
         <line x1={450} y1={940} x2={450 + 150 * arrow} y2={940} strokeDasharray="2 16" />
         <path d="M 588 922 L 606 940 L 588 958" />
       </g>
-      <LineBottle x={790} y={950} s={0.72} fill={fill} id="freshBottle" />
     </g>
   );
 };
@@ -266,32 +264,53 @@ const S4 = () => (
       </Svg>
     </Draw>
     <Sub top={1190} size={52} at={46} lines={['Масло на столе', 'через 48 часов']} />
+    <Bottle oil="sun" x={790} bottom={1150} height={440} at={50} />
     <FreshBar />
     <Sfx name="tap" at={6} gain={0.5} />
-    <Sfx name="pour" at={52} gain={0.4} />
+    <Sfx name="thud" at={56} gain={0.5} />
   </>
 );
 
-// --- 5. Composition: seeds = oil ----------------------------------------------------------------------------
+// --- 5. Quality: the seeds go under the press, oil runs out ----------------------------------------------------
 
-const RawArt: React.FC = () => {
+const PressArt: React.FC = () => {
   const f = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const eq = ramp(f, 36, 50);
-  const drop = spring({frame: f - 46, fps, config: {damping: 13, stiffness: 120}});
+  const line = useLine();
+  const fill = useFill();
+  const press = ramp(f, 40, 70, DRAW);
+  const top = 790 + 118 * press;
+  const pool = ramp(f, 66, 110);
+  const seeds = Array.from({length: 18}, (_, i) => ({x: 300 + (i % 9) * 60 + (i >= 9 ? 30 : 0), y: i >= 9 ? 950 : 912, r: ((i * 47) % 50) - 25}));
   return (
     <g>
-      <Glow cx={540} cy={1000} r={420} />
-      <g transform="translate(300 1000) scale(2) translate(-300 -1000)">
-        <SeedLine x={300} y={1000} rot={-14} />
-      </g>
-      <g opacity={eq} stroke={GOLD} strokeWidth={10} strokeLinecap="round">
-        <line x1={490} y1={975} x2={590} y2={975} />
-        <line x1={490} y1={1025} x2={590} y2={1025} />
-      </g>
-      <g transform={`translate(780 1130) scale(${drop})`}>
-        <path d={dropD(280)} fill="url(#gold)" />
-      </g>
+      <Glow cx={540} cy={1040} r={420} />
+      {/* ram and upper plate come down */}
+      <rect x={510} y={top - 140} width={60} height={110} rx={12} {...line} fill="#EDE8E0" />
+      <rect x={250} y={top - 34} width={580} height={44} rx={14} {...line} fill="#EDE8E0" />
+      {/* seeds flatten as the plate reaches them */}
+      {seeds.map((s, i) => (
+        <g key={i} transform={`translate(${s.x} ${s.y + (s.y < 940 ? 22 * press : 6 * press)}) scale(1 ${1 - 0.35 * press}) rotate(${90 + s.r}) scale(0.62)`} opacity={fill}>
+          <path d="M 0 -30 C 14 -22 16 10 0 30 C -16 10 -14 -22 0 -30 Z" fill="#2E2219" />
+          <path d="M -5 -18 C -6 -4 -6 8 -3 20 M 5 -18 C 6 -4 6 8 3 20" stroke="#B9AD9C" strokeWidth={2.4} fill="none" strokeLinecap="round" />
+        </g>
+      ))}
+      {/* lower plate with holes */}
+      <rect x={250} y={986} width={580} height={36} rx={12} {...line} fill="#EDE8E0" />
+      {[340, 450, 560, 670, 760].map((x) => (
+        <circle key={x} cx={x} cy={1004} r={7} fill={GOLD} opacity={press} />
+      ))}
+      {/* drops fall into a growing pool of oil */}
+      {[0, 1, 2, 3, 4, 5].map((k) => {
+        const t = ((f - 60 - k * 9) % 36) / 36;
+        if (f < 60 + k * 9) return null;
+        const x = [450, 560, 670, 340, 760, 560][k];
+        return (
+          <g key={k} transform={`translate(${x} ${1030 + t * 190})`} opacity={1 - t * 0.3}>
+            <path d={dropD(30)} fill="url(#gold)" />
+          </g>
+        );
+      })}
+      <ellipse cx={540} cy={1250} rx={60 + 230 * pool} ry={(60 + 230 * pool) * 0.16} fill="url(#gold)" opacity={pool} />
     </g>
   );
 };
@@ -304,53 +323,73 @@ const S5 = () => {
       <Head top={H} lines={['Масло из', 'качественного сырья']} />
       <Draw at={14} dur={26}>
         <Svg>
-          <RawArt />
+          <PressArt />
         </Svg>
       </Draw>
-      <div style={{position: 'absolute', top: 1190, left: 0, width: 1080, fontFamily: FONT.medium, fontSize: 44, color: LIGHT.sub}}>
-        <span style={{position: 'absolute', left: 300 - 150, width: 300, textAlign: 'center', opacity: ramp(f, 30, 44)}}>семена</span>
-        <span style={{position: 'absolute', left: 780 - 150, width: 300, textAlign: 'center', opacity: ramp(f, 54, 68)}}>масло</span>
-      </div>
-      <Sub top={1320} size={52} at={64} lines={['И ничего лишнего']} />
+      <div style={{position: 'absolute', top: 905, left: 860, fontFamily: FONT.medium, fontSize: 40, color: LIGHT.sub, opacity: ramp(f, 30, 44)}}>семена</div>
+      <div style={{position: 'absolute', top: 1225, left: 860, fontFamily: FONT.medium, fontSize: 40, color: GOLD, opacity: ramp(f, 90, 104)}}>масло</div>
+      <Sub top={1340} size={52} at={96} lines={['Только семена и пресс,', 'ничего лишнего']} />
       <Sfx name="tap" at={6} gain={0.5} />
-      <Sfx name="plop" at={48} gain={0.6} />
+      <Sfx name="squeeze" at={40} gain={0.45} />
+      <Sfx name="plop" at={70} gain={0.5} />
     </>
   );
 };
 
-// --- 6. Taste: a drop with its aroma rising -------------------------------------------------------------------
+// --- 6. Taste: every oil breathes out the aroma of its own grain ---------------------------------------------
 
-const TasteArt: React.FC = () => {
+const AROMAS = [
+  {oil: 'sun', name: 'подсолнечник', color: OIL.sun, x: 210},
+  {oil: 'linen', name: 'лён', color: OIL.linen, x: 430},
+  {oil: 'pumpkin', name: 'тыква', color: OIL.pumpkin, x: 650},
+  {oil: 'sesame', name: 'кунжут', color: '#B79A5E', x: 870},
+];
+
+const AromaColumn: React.FC<{a: (typeof AROMAS)[number]; i: number}> = ({a, i}) => {
   const f = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const drop = spring({frame: f - 14, fps, config: {damping: 14, stiffness: 110}});
-  const curl = useLine(GOLD, 8);
+  const curl = useLine(a.color, 7);
+  const sway = Math.sin(f / 16 + i) * 8;
+  const ride = ((f - 50 - i * 6) % 70) / 70;
+  const seedOn = f > 50 + i * 6;
   return (
     <g>
-      <Glow cx={540} cy={1150} r={420} />
-      <g transform={`translate(540 1430) scale(${drop})`}>
-        <path d={dropD(400)} fill="url(#gold)" />
-        <ellipse cx={-54} cy={-170} rx={22} ry={50} fill="#fff" opacity={0.45} transform="rotate(18 -54 -170)" />
-      </g>
-      {[-90, 0, 90].map((dx, k) => (
-        <path key={k} d={`M ${540 + dx} 960 c -44 -40 44 -80 0 -120 c -44 -40 40 -72 8 -110 c -18 -22 4 -40 24 -28`} transform={`translate(${Math.sin(f / 14 + k) * 7} ${-Math.sin(f / 22 + k) * 7})`} {...curl} opacity={0.6 + k * 0.2} />
+      {[-26, 22].map((dx, k) => (
+        <path key={k} d={`M ${a.x + dx} 900 c -34 -34 34 -68 0 -102 c -34 -34 30 -62 6 -94 c -14 -18 4 -32 20 -24`} transform={`translate(${sway * (k ? -1 : 1)} 0)`} {...curl} opacity={k ? 0.6 : 1} />
       ))}
+      {seedOn ? (
+        <g transform={`translate(${a.x + Math.sin(ride * 6 + i) * 18} ${880 - ride * 240}) rotate(${ride * 120})`} opacity={Math.sin(Math.PI * ride)}>
+          <ellipse rx={9} ry={15} fill={a.color} />
+        </g>
+      ) : null}
     </g>
   );
 };
 
-const S6 = () => (
-  <>
-    <Overline top={300}>Вкус и аромат</Overline>
-    <Head top={H} lines={['Живой вкус и аромат', 'свежих зёрен']} />
-    <Draw at={30} dur={36}>
-      <Svg>
-        <TasteArt />
-      </Svg>
-    </Draw>
-    <Sfx name="tap" at={6} gain={0.5} />
-  </>
-);
+const S6 = () => {
+  const f = useCurrentFrame();
+  return (
+    <>
+      <Overline top={300}>Вкус и аромат</Overline>
+      <Head top={H} lines={['Живой вкус и аромат', 'свежих зёрен']} />
+      {AROMAS.map((a, i) => (
+        <Bottle key={a.oil} oil={a.oil} x={a.x} bottom={1440} height={500} at={12 + i * 5} />
+      ))}
+      <Draw at={30} dur={30}>
+        <Svg>
+          {AROMAS.map((a, i) => (
+            <AromaColumn key={a.oil} a={a} i={i} />
+          ))}
+        </Svg>
+      </Draw>
+      {AROMAS.map((a, i) => (
+        <div key={a.oil} style={{position: 'absolute', top: 1470, left: a.x - 110, width: 220, textAlign: 'center', fontFamily: FONT.medium, fontSize: 32, color: a.color, opacity: ramp(f, 40 + i * 5, 54 + i * 5)}}>
+          {a.name}
+        </div>
+      ))}
+      <Sfx name="tap" at={6} gain={0.5} />
+    </>
+  );
+};
 
 // --- 7. Free from: four badges ------------------------------------------------------------------------------
 
