@@ -93,19 +93,6 @@ const SeedLine: React.FC<{x: number; y: number; rot: number; s?: number}> = ({x,
   );
 };
 
-// Ordinary shop bottle: tall, ribbed, clear plastic.
-const ShopBottle: React.FC<{x: number; y: number}> = ({x, y}) => {
-  const t = useTheme();
-  return (
-    <g transform={`translate(${x} ${y})`} {...mono(t)}>
-      <rect x={-34} y={-430} width={68} height={44} rx={10} />
-      <path d="M -26 -386 L -26 -330 C -26 -290 -120 -280 -120 -200 L -120 -120 C -100 -100 -100 -80 -120 -60 L -120 330 Q -120 370 -80 370 L 80 370 Q 120 370 120 330 L 120 -60 C 100 -80 100 -100 120 -120 L 120 -200 C 120 -280 26 -290 26 -330 L 26 -386" />
-      <path d="M -120 40 L 120 40" strokeOpacity={0.35} />
-      <path d="M -96 -40 L -96 320" strokeOpacity={0.25} strokeWidth={10} />
-    </g>
-  );
-};
-
 const Reason1Icon: React.FC = () => {
   const t = useTheme();
   return (
@@ -183,36 +170,77 @@ const Bottle: React.FC<{oil: string; x: number; bottom: number; height: number}>
 
 // --- scenes ---------------------------------------------------------------------------------
 
+// Alkali step: a lab flask with liquid and rising bubbles.
+const FlaskIcon: React.FC = () => {
+  const t = useTheme();
+  return (
+    <g>
+      <circle cx={540} cy={1250} r={330} fill="url(#glow)" />
+      <path d="M 490 1020 L 490 1150 L 380 1400 Q 370 1440 410 1440 L 670 1440 Q 710 1440 700 1400 L 590 1150 L 590 1020" {...mono(t)} />
+      <line x1={470} y1={1020} x2={610} y2={1020} {...mono(t)} />
+      <path d="M 426 1320 L 654 1320 L 690 1404 Q 696 1426 672 1426 L 408 1426 Q 384 1426 390 1404 Z" fill={GOLD} opacity={0.85} />
+      {[[500, 1270, 12], [560, 1230, 9], [530, 1180, 7]].map(([x, y, r]) => (
+        <circle key={y} cx={x} cy={y} r={r} {...mono(t)} />
+      ))}
+    </g>
+  );
+};
+
 const S1 = () => (
   <>
+    {/* the factory line of ordinary refined oil, cooled and dimmed */}
+    <Img src={staticFile('photo/refined_line.webp')} style={{position: 'absolute', left: 0, bottom: 0, width: 1080, height: 720, objectFit: 'cover', filter: 'saturate(0.75) brightness(0.8)'}} />
+    <div style={{position: 'absolute', left: 0, right: 0, top: 1200, height: 260, background: 'linear-gradient(#0D0B09, rgba(13,11,9,0))'}} />
     <Head top={300} size={80} lines={['Почему подсолнечное', 'масло из магазина', 'ничем не пахнет', 'и не имеет вкуса?']} />
-    <Svg>
-      <g transform="translate(540 1270) scale(0.85)">
-        <ShopBottle x={0} y={0} />
-      </g>
-    </Svg>
   </>
 );
 
 const S2 = () => (
   <>
-    <Head top={300} size={92} lines={['Вот 3 причины']} />
-    <div style={{position: 'absolute', top: 470, left: 0, right: 0, textAlign: 'center', fontFamily: FONT.medium, fontSize: 1100, lineHeight: 1, letterSpacing: '-0.06em', color: 'transparent', WebkitTextStroke: `3px ${GOLD}`}}>3</div>
+    <div style={{position: 'absolute', top: 640, left: 0, right: 0, textAlign: 'center', fontFamily: FONT.medium, fontSize: 1100, lineHeight: 1, letterSpacing: '-0.06em', color: 'transparent', WebkitTextStroke: '3px #5E5850'}}>4</div>
+    <Sub top={300} size={52} lines={['Потому что это']} />
+    <Head top={370} size={140} lines={['Рафинация']} />
+    <Sub top={540} size={46} lines={['4 этапа, которые масло проходит', 'на заводе, прежде чем попасть на полку']} />
   </>
 );
 
-const Reason: React.FC<{n: number; lines: string[]; icon: React.ReactNode}> = ({n, lines, icon}) => (
+const Step: React.FC<{n: number; lines: string[]; icon: React.ReactNode}> = ({n, lines, icon}) => (
   <>
     <Ghost>{n}</Ghost>
-    <Overline top={300}>{`Причина ${n} из 3`}</Overline>
+    <Overline top={300}>{`Этап ${n} из 4`}</Overline>
     <Head top={360} lines={lines} />
     <Svg>{icon}</Svg>
   </>
 );
 
-const S3 = () => <Reason n={1} lines={['Семена прогревают,', 'чтобы выжать', 'больше масла']} icon={<Reason1Icon />} />;
-const S4 = () => <Reason n={2} lines={['Масло очищают', 'и осветляют']} icon={<Reason2Icon />} />;
-const S5 = () => <Reason n={3} lines={['Запах и вкус убирают', 'паром при 200 °C', 'и выше']} icon={<Reason3Icon />} />;
+const S3 = () => <Step n={1} lines={['Семена жарят,', 'чтобы выжать', 'больше масла']} icon={<Reason1Icon />} />;
+const S4 = () => <Step n={2} lines={['Масло обрабатывают', 'щёлочью']} icon={<FlaskIcon />} />;
+const S5 = () => <Step n={3} lines={['Масло отбеливают,', 'чтобы убрать цвет']} icon={<Reason2Icon />} />;
+const S5b = () => <Step n={4} lines={['Пропаривают', 'при 200\u00a0°C и выше,', 'чтобы убрать', 'запах и вкус']} icon={<Reason3Icon />} />;
+
+// What reaches the shelf: four losses, each with a red cross.
+const LossRow: React.FC<{y: number; title: string; note: string; first?: boolean}> = ({y, title, note, first}) => (
+  <>
+    {first ? null : <div style={{position: 'absolute', top: y - 36, left: LEFT, right: LEFT, height: 2, background: 'rgba(255,255,255,0.1)'}} />}
+    <svg width={80} height={80} viewBox="-40 -40 80 80" style={{position: 'absolute', left: LEFT - 6, top: y - 2}}>
+      <circle r={30} fill="none" stroke="#E2312A" strokeWidth={4} />
+      <path d="M -11 -11 L 11 11 M 11 -11 L -11 11" stroke="#E2312A" strokeWidth={4} strokeLinecap="round" />
+    </svg>
+    <div style={{position: 'absolute', top: y, left: LEFT + 110, right: LEFT, fontFamily: FONT.medium, fontSize: 58, lineHeight: 1.05, letterSpacing: '-0.025em', color: DARK.text}}>{title}</div>
+    <div style={{position: 'absolute', top: y + 74, left: LEFT + 110, right: LEFT - 20, fontFamily: FONT.regular, fontSize: 40, lineHeight: 1.22, color: DARK.sub}}>{note}</div>
+  </>
+);
+
+const S5c = () => (
+  <>
+    <Overline top={300}>Итог рафинации</Overline>
+    <Head top={360} lines={['Что попадает', 'на полку']} />
+    <LossRow first y={640} title="Ни запаха, ни вкуса" note="их убирают паром специально" />
+    <LossRow y={870} title="Витамина E на треть меньше" note="теряется при очистке и пропаривании" />
+    <LossRow y={1100} title="Лецитин удалён" note="его убирают почти полностью" />
+    <LossRow y={1330} title="Появляются трансжиры" note="при нагреве выше 200 °C" />
+  </>
+);
 
 const S6 = () => (
   <>
@@ -230,7 +258,7 @@ const S7 = () => (
     <Overline top={300}>Как его делают</Overline>
     <Head top={360} lines={['Семена давят прессом', 'при температуре']} />
     <Figure top={560} size={250}>до 30 °C</Figure>
-    <Sub top={860} lines={['Масло не прогревают,', 'не очищают и не пропаривают']} />
+    <Sub top={860} lines={['Без жарки, щёлочи,', 'отбеливания и пара']} size={56} />
     <Svg>
       <g transform="translate(540 1330)">
         <SeedLine x={-150} y={0} rot={-90} s={0.9} />
@@ -267,7 +295,7 @@ const S8 = () => (
     <Head top={360} lines={['Что остаётся в масле']} />
     <Row
       first
-      y={600}
+      y={580}
       title="Витамин E"
       note="около трети дневной нормы в столовой ложке, помогает защищать клетки"
       icon={
@@ -280,9 +308,9 @@ const S8 = () => (
       }
     />
     <Row
-      y={900}
+      y={830}
       title="Лецитин"
-      note="при очистке масла его удаляют почти полностью"
+      note="при рафинации его удаляют почти полностью"
       icon={
         <g {...iconStroke}>
           <circle cx={-16} cy={-14} r={16} />
@@ -292,9 +320,9 @@ const S8 = () => (
       }
     />
     <Row
-      y={1200}
+      y={1080}
       title="Запах и вкус семян"
-      note="очистка паром убирает их, холодный отжим сохраняет"
+      note="рафинация убирает их, холодный отжим сохраняет"
       icon={
         <g {...iconStroke}>
           <path d="M 0 -42 C 20 -31 23 15 0 42 C -23 15 -20 -31 0 -42 Z" />
@@ -302,22 +330,17 @@ const S8 = () => (
         </g>
       }
     />
-  </>
-);
-
-const S9 = () => (
-  <>
-    <Overline top={300}>Чего в нём нет</Overline>
-    <Head top={360} lines={['Трансжиров от нагрева']} />
-    <Figure top={560} size={200}>
-      <span style={{color: '#B9AFA4'}}>200 °C</span>
-    </Figure>
-    <Sub top={770} lines={['при очистке паром', 'в масле образуются трансжиры']} />
-    <div style={{position: 'absolute', top: 960, left: LEFT, right: LEFT, height: 2, background: 'rgba(38,23,13,0.1)'}} />
-    <Figure top={1020} size={200}>
-      30 °C
-    </Figure>
-    <Sub top={1230} lines={['при холодном отжиме', 'они не образуются']} />
+    <Row
+      y={1330}
+      title="Без трансжиров от нагрева"
+      note="при отжиме до 30 °C они не образуются"
+      icon={
+        <g {...iconStroke}>
+          <circle r={40} />
+          <path d="M -18 0 L -5 13 L 20 -14" />
+        </g>
+      }
+    />
   </>
 );
 
@@ -355,10 +378,11 @@ const SCENES: {C: React.FC; theme: Theme}[] = [
   {C: S3, theme: DARK},
   {C: S4, theme: DARK},
   {C: S5, theme: DARK},
+  {C: S5b, theme: DARK},
+  {C: S5c, theme: DARK},
   {C: S6, theme: LIGHT},
   {C: S7, theme: LIGHT},
   {C: S8, theme: LIGHT},
-  {C: S9, theme: LIGHT},
   {C: S10, theme: LIGHT},
   {C: S11, theme: LIGHT},
 ];
