@@ -217,11 +217,11 @@ const S5 = () => <Reason n={3} lines={['Запах и вкус убирают', 
 const S6 = () => (
   <>
     <Overline top={300}>Масларада</Overline>
-    <Head top={360} lines={['Сыродавленное масло', 'холодного отжима']} />
+    <Head top={360} lines={['Сыродавленное', 'подсолнечное масло', 'холодного отжима']} />
     <Svg>
-      <ellipse cx={540} cy={1200} rx={360} ry={420} fill="url(#glow)" opacity={0.6} />
+      <ellipse cx={540} cy={1240} rx={340} ry={380} fill="url(#glow)" opacity={0.6} />
     </Svg>
-    <Bottle oil="sun" x={540} bottom={1560} height={930} />
+    <Bottle oil="sun" x={540} bottom={1560} height={840} />
   </>
 );
 
