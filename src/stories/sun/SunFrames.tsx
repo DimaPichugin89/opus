@@ -228,7 +228,7 @@ const S7 = () => (
     <Overline top={300}>Как его делают</Overline>
     <Head top={360} lines={['Семена давят прессом', 'при температуре']} />
     <Figure top={560} size={250}>до 30 °C</Figure>
-    <Sub top={860} lines={['Поэтому масло сохраняет', 'запах семян и мягкий вкус']} />
+    <Sub top={860} lines={['Масло не прогревают,', 'не очищают и не пропаривают']} />
     <Svg>
       <g transform="translate(540 1330)">
         <SeedLine x={-150} y={0} rot={-90} s={0.9} />
@@ -245,39 +245,93 @@ const S7 = () => (
   </>
 );
 
+// A row of a spec list: gold icon, title, one explaining line, hairline divider above.
+const Row: React.FC<{y: number; icon: React.ReactNode; title: string; note: string; first?: boolean}> = ({y, icon, title, note, first}) => (
+  <>
+    {first ? null : <div style={{position: 'absolute', top: y - 40, left: LEFT, right: LEFT, height: 2, background: 'rgba(38,23,13,0.1)'}} />}
+    <svg width={120} height={120} viewBox="-60 -60 120 120" style={{position: 'absolute', left: LEFT - 20, top: y - 10}}>
+      {icon}
+    </svg>
+    <div style={{position: 'absolute', top: y, left: LEFT + 130, right: LEFT, fontFamily: FONT.medium, fontSize: 60, lineHeight: 1.05, letterSpacing: '-0.025em', color: COLORS.ink}}>{title}</div>
+    <div style={{position: 'absolute', top: y + 78, left: LEFT + 130, right: LEFT - 20, fontFamily: FONT.regular, fontSize: 40, lineHeight: 1.22, color: LIGHT.sub}}>{note}</div>
+  </>
+);
+
+const iconStroke = {fill: 'none', stroke: GOLD, strokeWidth: 5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const};
+
 const S8 = () => (
   <>
-    <Overline top={300}>Чем богато</Overline>
-    <Head top={360} lines={['Витамином E']} />
-    <Svg>
-      {/* typographic fraction: about one third */}
-      <text x={LEFT + 10} y={790} fontFamily={FONT.medium} fontSize={300} letterSpacing="-0.05em" fill={GOLD}>
-        1
-      </text>
-      <line x1={LEFT + 210} y1={900} x2={LEFT + 400} y2={560} stroke={GOLD} strokeWidth={14} strokeLinecap="round" />
-      <text x={LEFT + 380} y={1000} fontFamily={FONT.medium} fontSize={300} letterSpacing="-0.05em" fill={GOLD}>
-        3
-      </text>
-    </Svg>
-    <Sub top={1080} size={54} lines={['дневной нормы', 'в одной столовой ложке']} />
-    <Sub top={1290} lines={['Витамин E помогает', 'защищать клетки']} />
+    <Overline top={300}>Чем оно богато</Overline>
+    <Head top={360} lines={['Что остаётся в масле']} />
+    <Row
+      first
+      y={600}
+      title="Витамин E"
+      note="около трети дневной нормы в столовой ложке, помогает защищать клетки"
+      icon={
+        <g>
+          <circle r={40} {...iconStroke} />
+          <text y={17} textAnchor="middle" fontFamily={FONT.medium} fontSize={48} fill={GOLD}>
+            E
+          </text>
+        </g>
+      }
+    />
+    <Row
+      y={900}
+      title="Лецитин"
+      note="при очистке масла его удаляют почти полностью"
+      icon={
+        <g {...iconStroke}>
+          <circle cx={-16} cy={-14} r={16} />
+          <circle cx={20} cy={-6} r={12} />
+          <circle cx={-2} cy={24} r={14} />
+        </g>
+      }
+    />
+    <Row
+      y={1200}
+      title="Запах и вкус семян"
+      note="очистка паром убирает их, холодный отжим сохраняет"
+      icon={
+        <g {...iconStroke}>
+          <path d="M 0 -42 C 20 -31 23 15 0 42 C -23 15 -20 -31 0 -42 Z" />
+          <path d="M -6 -24 C -7 -5 -7 12 -3 27 M 6 -24 C 7 -5 7 12 3 27" strokeWidth={3} strokeOpacity={0.6} />
+        </g>
+      }
+    />
   </>
 );
 
 const S9 = () => (
   <>
+    <Overline top={300}>Чего в нём нет</Overline>
+    <Head top={360} lines={['Трансжиров от нагрева']} />
+    <Figure top={560} size={200}>
+      <span style={{color: '#B9AFA4'}}>200 °C</span>
+    </Figure>
+    <Sub top={770} lines={['при очистке паром', 'в масле образуются трансжиры']} />
+    <div style={{position: 'absolute', top: 960, left: LEFT, right: LEFT, height: 2, background: 'rgba(38,23,13,0.1)'}} />
+    <Figure top={1020} size={200}>
+      30 °C
+    </Figure>
+    <Sub top={1230} lines={['при холодном отжиме', 'они не образуются']} />
+  </>
+);
+
+const S10 = () => (
+  <>
     <Overline top={300}>Отжим только после заказа</Overline>
     <Head top={360} lines={['От заказа до стола']} />
-    <Figure top={500} size={520}>
-      48
+    <Figure top={470} size={230}>
+      48 часов
     </Figure>
-    <Head top={960} size={84} lines={['часов']} color={GOLD} />
-    <Sub top={1110} lines={['Дата отжима', 'на каждой бутылке']} />
+    <Img src={staticFile('photo/nabor2.jpg')} style={{position: 'absolute', left: 64, top: 790, width: 952, height: 770, objectFit: 'cover', objectPosition: '30% 50%', borderRadius: 28}} />
   </>
 );
 
 const RANGE = ['almond', 'camelina', 'sun', 'thistle', 'pumpkin'];
-const S10 = () => (
+const S11 = () => (
   <>
     <Sub top={300} size={52} lines={['Заказывайте на']} />
     <Head top={370} size={120} lines={['maslarada.ru']} />
@@ -301,6 +355,7 @@ const SCENES: {C: React.FC; theme: Theme}[] = [
   {C: S8, theme: LIGHT},
   {C: S9, theme: LIGHT},
   {C: S10, theme: LIGHT},
+  {C: S11, theme: LIGHT},
 ];
 export const SUN_FRAMES_COUNT = SCENES.length;
 
