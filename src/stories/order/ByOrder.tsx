@@ -1,5 +1,5 @@
 // Reel "Pressed to order": the producer's voice, benefits one per screen, then the order.
-// Script: the client's konspekt (first person, Vladivostok delivery). Design and motion are the
+// Script: the client's konspekt, reworded without the first person; delivery in Vladivostok. Design and motion are the
 // sunflower reel's: white screens, gold accents, monoline icons that draw themselves, calm lifts.
 import React from 'react';
 import {Easing, Freeze, Img, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
@@ -58,7 +58,7 @@ const S1 = () => (
       <HookArt />
     </Svg>
     <Overline top={300} at={26}>Масларада</Overline>
-    <Head top={H} at={30} lines={['Отжимаю это масло', 'сам, под каждый', 'заказ']} />
+    <Head top={H} at={30} lines={['Отжим масла', 'под ваш заказ']} />
     <Sfx name="plop" at={22} gain={0.8} />
     <Sfx name="tap" at={30} gain={0.5} />
   </>
@@ -223,13 +223,13 @@ const FreshBar: React.FC = () => {
 const S4 = () => (
   <>
     <Overline top={300}>Свежесть</Overline>
-    <Head top={H} lines={['Отжимаю', 'в день заказа']} />
+    <Head top={H} lines={['Свежий отжим', 'сразу после заказа']} />
     <Draw at={14} dur={30}>
       <Svg>
         <FreshArt />
       </Svg>
     </Draw>
-    <Sub top={1190} size={52} at={46} lines={['Бутылка с максимальной', 'питательной ценностью']} />
+    <Sub top={1190} size={52} at={46} lines={['Масло на столе', 'через 48 часов']} />
     <FreshBar />
     <Sfx name="tap" at={6} gain={0.5} />
     <Sfx name="pour" at={52} gain={0.4} />
@@ -264,8 +264,8 @@ const S5 = () => {
   const f = useCurrentFrame();
   return (
     <>
-      <Overline top={300}>Состав</Overline>
-      <Head top={H} lines={['В составе', 'только сырьё']} />
+      <Overline top={300}>Качество</Overline>
+      <Head top={H} lines={['Масло из', 'качественного сырья']} />
       <Draw at={14} dur={26}>
         <Svg>
           <RawArt />
@@ -275,7 +275,7 @@ const S5 = () => {
         <span style={{position: 'absolute', left: 300 - 150, width: 300, textAlign: 'center', opacity: ramp(f, 30, 44)}}>семена</span>
         <span style={{position: 'absolute', left: 780 - 150, width: 300, textAlign: 'center', opacity: ramp(f, 54, 68)}}>масло</span>
       </div>
-      <Sub top={1320} size={52} at={64} lines={['Ничего не добавляю']} />
+      <Sub top={1320} size={52} at={64} lines={['И ничего лишнего']} />
       <Sfx name="tap" at={6} gain={0.5} />
       <Sfx name="plop" at={48} gain={0.6} />
     </>
@@ -306,7 +306,7 @@ const TasteArt: React.FC = () => {
 const S6 = () => (
   <>
     <Overline top={300}>Вкус и аромат</Overline>
-    <Head top={H} lines={['Живой вкус', 'и аромат культуры']} />
+    <Head top={H} lines={['Живой вкус и аромат', 'свежих зёрен']} />
     <Draw at={30} dur={36}>
       <Svg>
         <TasteArt />
@@ -358,10 +358,10 @@ const BadgeIcon: React.FC<{kind: 'gluten' | 'lactose' | 'vegan' | 'raw'}> = ({ki
 };
 
 const BADGES: {kind: 'gluten' | 'lactose' | 'vegan' | 'raw'; label: string; x: number; y: number}[] = [
-  {kind: 'gluten', label: 'без глютена', x: 330, y: 930},
-  {kind: 'lactose', label: 'без лактозы', x: 750, y: 930},
-  {kind: 'vegan', label: 'веганам', x: 330, y: 1320},
-  {kind: 'raw', label: 'сыроедам', x: 750, y: 1320},
+  {kind: 'gluten', label: 'без глютена', x: 330, y: 960},
+  {kind: 'lactose', label: 'без лактозы', x: 750, y: 960},
+  {kind: 'vegan', label: 'веганам', x: 330, y: 1330},
+  {kind: 'raw', label: 'сыроедам', x: 750, y: 1330},
 ];
 
 const Badge: React.FC<{b: (typeof BADGES)[number]; at: number}> = ({b, at}) => {
@@ -385,7 +385,7 @@ const S7 = () => (
   <>
     <Overline top={300}>Подойдёт всем</Overline>
     <Head top={H} lines={['Без глютена', 'и лактозы']} />
-    <Sub top={H + 200} size={52} at={20} lines={['Подойдёт веганам и сыроедам']} />
+    <Sub top={H + 200} size={48} at={20} lines={['Подойдёт веганам, сыроедам', 'и всем ценителям', 'здорового питания']} />
     <Svg>
       {BADGES.map((b, i) => (
         <Badge key={b.kind} b={b} at={30 + i * 12} />
@@ -467,38 +467,68 @@ const S8 = () => (
 
 const LINEUP = ['linen', 'hemp', 'sesame', 'pumpkin', 'sun', 'mustard', 'camelina', 'almond', 'peanut', 'thistle'];
 
-const Pin: React.FC = () => {
+// Delivery: the pin drops onto the headline's line, the range stands up below.
+const PinArt: React.FC = () => {
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const p = spring({frame: f - 70, fps, config: {damping: 10, stiffness: 140}});
+  const p = spring({frame: f - 18, fps, config: {damping: 10, stiffness: 140}});
+  const ring = ramp(f, 26, 50);
   return (
-    <div style={{position: 'absolute', top: 1340, left: 0, width: 1080, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 22, opacity: Math.min(1, p * 1.4)}}>
-      <svg width={52} height={70} viewBox="-26 -36 52 70" style={{transform: `translateY(${(1 - p) * -40}px)`}}>
-        <path d="M 0 32 C -16 10 -24 -2 -24 -12 A 24 24 0 0 1 24 -12 C 24 -2 16 10 0 32 Z" fill={GOLD} />
-        <circle cx={0} cy={-12} r={9} fill="#fff" />
-      </svg>
-      <span style={{fontFamily: FONT.medium, fontSize: 50, color: COLORS.ink, transform: `translateX(${(1 - p) * 20}px)`}}>Доставка по Владивостоку</span>
-    </div>
+    <g>
+      <ellipse cx={540} cy={830} rx={30 + 90 * ring} ry={(30 + 90 * ring) * 0.3} fill="none" stroke={GOLD} strokeWidth={4} opacity={ring > 0 ? 1 - ring : 0} />
+      <g transform={`translate(540 ${830 - (1 - p) * 220})`} opacity={Math.min(1, p * 2)}>
+        <path d="M 0 0 C -30 -40 -46 -62 -46 -84 A 46 46 0 0 1 46 -84 C 46 -62 30 -40 0 0 Z" fill={GOLD} />
+        <circle cx={0} cy={-84} r={17} fill="#fff" />
+      </g>
+    </g>
   );
 };
 
-const S9 = () => {
+const S9 = () => (
+  <>
+    <Overline top={300}>Масларада</Overline>
+    <Head top={H} lines={['Доставка', 'по Владивостоку']} />
+    <Svg>
+      <Glow cx={540} cy={1150} r={520} />
+      <PinArt />
+    </Svg>
+    {LINEUP.map((oil, i) => (
+      <Bottle key={oil} oil={oil} x={108 + i * 96} bottom={1330} height={380} at={30 + Math.abs(i - 4.5) * 4} />
+    ))}
+    <Sub top={1400} size={48} at={56} lines={['10 сыродавленных масел', 'из разных культур']} />
+    <Sfx name="tap" at={6} gain={0.5} />
+    <Sfx name="plop" at={26} gain={0.6} />
+    <Sfx name="thud" at={36} gain={0.5} />
+  </>
+);
+
+// Call to order on its own: logo, the address, an oil line drawing under it.
+const S10 = () => {
   const f = useCurrentFrame();
-  const logo = ramp(f, 24, 40);
+  const logo = ramp(f, 4, 22);
+  const line = ramp(f, 34, 60, DRAW);
+  const drip = ramp(f, 58, 74, Easing.in(Easing.quad));
+  const x0 = 200;
+  const x1 = x0 + 680 * line;
   return (
     <>
-      <Sub top={300} size={52} at={4} lines={['Заказывай на']} />
-      <Head top={370} size={120} at={10} lines={['maslarada.ru']} />
-      <Img src={staticFile('logo/logo_black.png')} style={{position: 'absolute', left: (1080 - 400) / 2, top: 590, width: 400, height: 400 / 2.527, opacity: logo, transform: `translateY(${(1 - logo) * 16}px)`}} />
       <Svg>
-        <Glow cx={540} cy={1060} r={520} />
+        <Glow cx={540} cy={960} r={520} />
+        {line > 0 ? (
+          <>
+            <line x1={x0} y1={1130} x2={x1} y2={1130} stroke={GOLD} strokeWidth={7} strokeLinecap="round" />
+            <g transform={`translate(${x1} ${1134 + drip * 40})`} opacity={1 - drip * 0.4}>
+              <path d={dropD(30)} fill="url(#gold)" transform="translate(0 30)" />
+            </g>
+          </>
+        ) : null}
       </Svg>
-      {LINEUP.map((oil, i) => (
-        <Bottle key={oil} oil={oil} x={108 + i * 96} bottom={1250} height={380} at={34 + Math.abs(i - 4.5) * 4} />
-      ))}
-      <Pin />
-      <Sfx name="tap" at={10} gain={0.5} />
-      <Sfx name="thud" at={40} gain={0.5} />
+      <Img src={staticFile('logo/logo_black.png')} style={{position: 'absolute', left: (1080 - 440) / 2, top: 640, width: 440, height: 440 / 2.527, opacity: logo, transform: `translateY(${(1 - logo) * 16}px)`}} />
+      <div style={{position: 'absolute', top: 900, left: 0, right: 0, textAlign: 'center', fontFamily: FONT.regular, fontSize: 56, color: LIGHT.sub, opacity: ramp(f, 12, 28)}}>Заказывайте на</div>
+      <div style={{position: 'absolute', top: 980, left: 0, right: 0, textAlign: 'center', fontFamily: FONT.medium, fontSize: 130, letterSpacing: '-0.03em', color: COLORS.ink, overflow: 'hidden'}}>
+        <div style={{transform: `translateY(${(1 - ramp(f, 18, 40)) * 110}%)`}}>maslarada.ru</div>
+      </div>
+      <Sfx name="tap" at={18} gain={0.5} />
     </>
   );
 };
@@ -512,7 +542,8 @@ const SCENES: Scene[] = [
   {C: S6, theme: LIGHT, dur: 105},
   {C: S7, theme: LIGHT, dur: 130},
   {C: S8, theme: LIGHT, dur: 140},
-  {C: S9, theme: LIGHT, dur: 150},
+  {C: S9, theme: LIGHT, dur: 130},
+  {C: S10, theme: LIGHT, dur: 110},
 ];
 
 export const BY_ORDER_FRAMES = reelFrames(SCENES);
