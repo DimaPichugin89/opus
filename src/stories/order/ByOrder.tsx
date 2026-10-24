@@ -66,25 +66,58 @@ const S1 = () => (
 
 // --- 2. Cold pressing: a cold thermometer, the flame struck out -----------------------------------------
 
+// Thermometer scale 0..60 °C; the pressing band 12-30 °C lights up, the heat zone above is struck out.
+const TY = (c: number) => 1400 - c * 9;
 const ColdArt: React.FC = () => {
   const f = useCurrentFrame();
+  const {fps} = useVideoConfig();
   const line = useLine();
   const fill = useFill();
-  const slash = ramp(f, 46, 62, DRAW);
+  const level = 30 * spring({frame: f - 34, fps, config: {damping: 14, stiffness: 50}});
+  const band = ramp(f, 56, 72);
+  const heat = ramp(f, 70, 86);
+  const slash = ramp(f, 82, 96, DRAW);
+  const BLUE = OIL.linen;
+  const RED = '#E2312A';
   return (
     <g>
-      <Glow cx={540} cy={1080} r={380} />
-      {/* thermometer, barely warm */}
-      <path d="M 340 1220 L 340 860 A 22 22 0 0 1 384 860 L 384 1220" {...line} />
-      <circle cx={362} cy={1262} r={46} {...line} />
-      <circle cx={362} cy={1262} r={30} fill={GOLD} opacity={fill} />
-      <rect x={354} y={1240 - 90 * fill} width={16} height={90 * fill} rx={8} fill={GOLD} />
-      {[0, 1, 2, 3].map((k) => (
-        <line key={k} x1={400} y1={900 + k * 80} x2={424} y2={900 + k * 80} {...line} strokeOpacity={0.5} />
+      <Glow cx={540} cy={1150} r={420} opacity={0.7} />
+      {/* zones to the right of the tube */}
+      <rect x={380} y={TY(60)} width={600 * heat} height={TY(30) - TY(60)} rx={18} fill={RED} opacity={0.07} />
+      <rect x={380} y={TY(30)} width={600 * band} height={TY(12) - TY(30)} rx={18} fill={BLUE} opacity={0.12} />
+      <line x1={344} y1={TY(30)} x2={344 + 636 * band} y2={TY(30)} stroke={BLUE} strokeWidth={3} strokeDasharray="8 10" />
+      <line x1={344} y1={TY(12)} x2={344 + 636 * band} y2={TY(12)} stroke={BLUE} strokeWidth={3} strokeDasharray="8 10" />
+      {/* the tube */}
+      <path d={`M 300 ${TY(0)} L 300 ${TY(60)} A 22 22 0 0 1 344 ${TY(60)} L 344 ${TY(0)}`} {...line} />
+      <circle cx={322} cy={1442} r={46} {...line} />
+      <circle cx={322} cy={1442} r={30} fill={GOLD} opacity={fill} />
+      <rect x={314} y={TY(level)} width={16} height={1430 - TY(level)} rx={8} fill={GOLD} opacity={fill} />
+      {[0, 10, 20, 30, 40, 50, 60].map((c) => (
+        <g key={c} opacity={fill}>
+          <line x1={262} y1={TY(c)} x2={284} y2={TY(c)} stroke={COLORS.ink} strokeWidth={3} strokeOpacity={0.5} />
+          <text x={250} y={TY(c) + 11} textAnchor="end" fontFamily={FONT.regular} fontSize={30} fill={LIGHT.sub}>
+            {c}
+          </text>
+        </g>
       ))}
-      {/* the flame, struck out */}
-      <path d="M 700 900 C 750 950 790 1000 776 1070 C 766 1120 730 1150 700 1150 C 670 1150 634 1120 624 1070 C 612 1010 646 980 662 950 C 668 984 684 994 692 990 C 680 956 684 926 700 900 Z" {...line} />
-      <line x1={600} y1={1170} x2={600 + 200 * slash} y2={1170 - 300 * slash} stroke="#E2312A" strokeWidth={8} strokeLinecap="round" opacity={slash > 0 ? 1 : 0} />
+      {/* labels */}
+      <g opacity={band}>
+        <text x={420} y={TY(21) + 6} fontFamily={FONT.medium} fontSize={64} letterSpacing="-0.02em" fill={BLUE}>
+          12–30 °C
+        </text>
+        <text x={420} y={TY(21) + 52} fontFamily={FONT.regular} fontSize={34} fill={LIGHT.sub}>
+          температура отжима
+        </text>
+      </g>
+      <g opacity={heat}>
+        <text x={420} y={TY(45) + 12} fontFamily={FONT.medium} fontSize={54} fill={RED} opacity={0.85}>
+          нагрев
+        </text>
+        <g transform={`translate(860 ${TY(45)}) scale(0.55)`}>
+          <path d="M 0 -125 C 50 -75 90 -25 76 45 C 66 95 30 125 0 125 C -30 125 -66 95 -76 45 C -88 -15 -54 -45 -38 -75 C -32 -41 -16 -31 -8 -35 C -20 -69 -16 -99 0 -125 Z" fill="none" stroke={RED} strokeWidth={8} strokeLinejoin="round" />
+        </g>
+        <line x1={800} y1={TY(45) + 80} x2={800 + 120 * slash} y2={TY(45) + 80 - 160 * slash} stroke={RED} strokeWidth={8} strokeLinecap="round" opacity={slash > 0 ? 1 : 0} />
+      </g>
     </g>
   );
 };
@@ -99,21 +132,24 @@ const S2 = () => (
       </Svg>
     </Draw>
     <Sfx name="tap" at={6} gain={0.5} />
+    <Sfx name="tick" at={58} gain={0.8} />
+    <Sfx name="tick" at={84} gain={0.8} />
   </>
 );
 
 // --- 3. What stays: the kernel turns into a drop, tags float up around it ----------------------------------
 
-const Tag: React.FC<{x: number; y: number; label: string; at: number}> = ({x, y, label, at}) => {
+const Tag: React.FC<{x: number; y: number; label: string; at: number; color: string}> = ({x, y, label, at, color}) => {
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
   const p = spring({frame: f - at, fps, config: {damping: 12, stiffness: 140}});
-  const w = label.length * 25 + 64;
+  const w = label.length * 25 + 90;
   const bob = Math.sin(f / 16 + x) * 6;
   return (
     <g transform={`translate(${x} ${y + bob}) scale(${p})`} opacity={Math.min(1, p * 1.5)}>
-      <rect x={-w / 2} y={-38} width={w} height={76} rx={38} fill="#FFFFFF" stroke={GOLD} strokeWidth={4} />
-      <text x={0} y={15} textAnchor="middle" fontFamily={FONT.medium} fontSize={42} fill={COLORS.ink}>
+      <rect x={-w / 2} y={-38} width={w} height={76} rx={38} fill="#FFFFFF" stroke={color} strokeWidth={4} />
+      <circle cx={-w / 2 + 30} cy={0} r={9} fill={color} />
+      <text x={14} y={15} textAnchor="middle" fontFamily={FONT.medium} fontSize={42} fill={COLORS.ink}>
         {label}
       </text>
     </g>
@@ -135,9 +171,9 @@ const KeepArt: React.FC = () => {
         <path d={dropD(360)} fill="url(#gold)" />
         <ellipse cx={-48} cy={-150} rx={20} ry={44} fill="#fff" opacity={0.45} transform="rotate(18 -48 -150)" />
       </g>
-      <Tag x={290} y={900} label="витамины" at={56} />
-      <Tag x={810} y={1010} label="омега" at={66} />
-      <Tag x={540} y={1440} label="антиоксиданты" at={76} />
+      <Tag x={290} y={900} label="витамины" at={56} color={OIL.peanut} />
+      <Tag x={810} y={1010} label="омега" at={66} color={OIL.linen} />
+      <Tag x={540} y={1440} label="антиоксиданты" at={76} color={OIL.hemp} />
     </g>
   );
 };
@@ -318,8 +354,9 @@ const S6 = () => (
 
 // --- 7. Free from: four badges ------------------------------------------------------------------------------
 
-const BadgeIcon: React.FC<{kind: 'gluten' | 'lactose' | 'vegan' | 'raw'}> = ({kind}) => {
-  const g = useLine(GOLD, 6);
+type BadgeKind = 'gluten' | 'lactose' | 'vegan' | 'raw' | 'healthy';
+const BadgeIcon: React.FC<{kind: BadgeKind; color: string}> = ({kind, color}) => {
+  const g = useLine(color, 6);
   if (kind === 'gluten')
     return (
       <g>
@@ -330,38 +367,47 @@ const BadgeIcon: React.FC<{kind: 'gluten' | 'lactose' | 'vegan' | 'raw'}> = ({ki
             <ellipse cx={16} cy={y} rx={12} ry={20} transform={`rotate(30 16 ${y})`} {...g} />
           </g>
         ))}
-        <line x1={-64} y1={64} x2={64} y2={-64} {...g} />
+        <line x1={-60} y1={60} x2={60} y2={-60} {...g} />
       </g>
     );
   if (kind === 'lactose')
     return (
       <g>
-        <path d="M -16 -66 L 16 -66 L 16 -40 L 36 -10 L 36 62 L -36 62 L -36 -10 L -16 -40 Z" {...g} />
-        <line x1={-36} y1={10} x2={36} y2={10} {...g} />
-        <line x1={-64} y1={64} x2={64} y2={-64} {...g} />
+        <path d="M -16 -62 L 16 -62 L 16 -38 L 34 -10 L 34 58 L -34 58 L -34 -10 L -16 -38 Z" {...g} />
+        <line x1={-34} y1={10} x2={34} y2={10} {...g} />
+        <line x1={-60} y1={60} x2={60} y2={-60} {...g} />
       </g>
     );
   if (kind === 'vegan')
     return (
       <g>
-        <path d="M -50 50 C -60 -20 0 -70 60 -60 C 70 0 20 60 -50 50 Z" {...g} />
-        <path d="M -50 50 L 30 -30" {...g} />
+        <path d="M -48 48 C -58 -20 0 -66 58 -58 C 66 0 18 58 -48 48 Z" {...g} />
+        <path d="M -48 48 L 28 -28" {...g} />
+      </g>
+    );
+  if (kind === 'raw')
+    return (
+      <g>
+        <path d="M 0 62 L 0 -6" {...g} />
+        <path d="M 0 -6 C -10 -48 -48 -58 -62 -42 C -56 -14 -28 0 0 -6 Z" {...g} />
+        <path d="M 0 -20 C 10 -62 48 -72 62 -56 C 56 -28 28 -14 0 -20 Z" {...g} />
       </g>
     );
   return (
     <g>
-      <path d="M 0 66 L 0 -6" {...g} />
-      <path d="M 0 -6 C -10 -50 -50 -60 -66 -44 C -60 -14 -30 0 0 -6 Z" {...g} />
-      <path d="M 0 -20 C 10 -64 50 -74 66 -58 C 60 -28 30 -14 0 -20 Z" {...g} />
+      <path d="M 0 -30 C -20 -54 -64 -46 -60 -6 C -56 30 -24 58 0 58 C 24 58 56 30 60 -6 C 64 -46 20 -54 0 -30 Z" {...g} />
+      <path d="M 0 -30 C 0 -48 8 -60 22 -66" {...g} />
+      <path d="M 6 -46 C 22 -64 44 -60 48 -50 C 34 -40 18 -40 6 -46 Z" {...g} />
     </g>
   );
 };
 
-const BADGES: {kind: 'gluten' | 'lactose' | 'vegan' | 'raw'; label: string; x: number; y: number}[] = [
-  {kind: 'gluten', label: 'без глютена', x: 330, y: 960},
-  {kind: 'lactose', label: 'без лактозы', x: 750, y: 960},
-  {kind: 'vegan', label: 'веганам', x: 330, y: 1330},
-  {kind: 'raw', label: 'сыроедам', x: 750, y: 1330},
+const BADGES: {kind: BadgeKind; label: string[]; color: string; x: number; y: number}[] = [
+  {kind: 'gluten', label: ['без глютена'], color: '#D9A21B', x: 230, y: 860},
+  {kind: 'lactose', label: ['без лактозы'], color: OIL.linen, x: 540, y: 860},
+  {kind: 'vegan', label: ['веганам'], color: OIL.hemp, x: 850, y: 860},
+  {kind: 'raw', label: ['сыроедам'], color: '#7E9A2A', x: 385, y: 1230},
+  {kind: 'healthy', label: ['ценителям', 'здорового питания'], color: OIL.sun, x: 695, y: 1230},
 ];
 
 const Badge: React.FC<{b: (typeof BADGES)[number]; at: number}> = ({b, at}) => {
@@ -371,11 +417,14 @@ const Badge: React.FC<{b: (typeof BADGES)[number]; at: number}> = ({b, at}) => {
   return (
     <Draw at={at + 4} dur={26}>
       <g transform={`translate(${b.x} ${b.y}) scale(${0.6 + 0.4 * p})`} opacity={Math.min(1, p * 1.4)}>
-        <circle r={120} fill="#FFF8EA" />
-        <BadgeIcon kind={b.kind} />
-        <text y={185} textAnchor="middle" fontFamily={FONT.medium} fontSize={42} fill={COLORS.ink}>
-          {b.label}
-        </text>
+        <circle r={112} fill={b.color} opacity={0.1} />
+        <circle r={112} fill="none" stroke={b.color} strokeOpacity={0.35} strokeWidth={3} />
+        <BadgeIcon kind={b.kind} color={b.color} />
+        {b.label.map((l, k) => (
+          <text key={l} y={160 + k * 42} textAnchor="middle" fontFamily={FONT.medium} fontSize={38} fill={COLORS.ink}>
+            {l}
+          </text>
+        ))}
       </g>
     </Draw>
   );
@@ -383,17 +432,16 @@ const Badge: React.FC<{b: (typeof BADGES)[number]; at: number}> = ({b, at}) => {
 
 const S7 = () => (
   <>
-    <Overline top={300}>Подойдёт всем</Overline>
-    <Head top={H} lines={['Без глютена', 'и лактозы']} />
-    <Sub top={H + 200} size={48} at={20} lines={['Подойдёт веганам, сыроедам', 'и всем ценителям', 'здорового питания']} />
+    <Overline top={300}>Состав</Overline>
+    <Head top={H} lines={['Подходит', 'для любого рациона']} />
     <Svg>
       {BADGES.map((b, i) => (
-        <Badge key={b.kind} b={b} at={30 + i * 12} />
+        <Badge key={b.kind} b={b} at={24 + i * 11} />
       ))}
     </Svg>
     <Sfx name="tap" at={6} gain={0.5} />
     {BADGES.map((_, i) => (
-      <Sfx key={i} name="tick" at={30 + i * 12} gain={0.8} />
+      <Sfx key={i} name="tick" at={24 + i * 11} gain={0.8} />
     ))}
   </>
 );
