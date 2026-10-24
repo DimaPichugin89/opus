@@ -497,53 +497,36 @@ const S8c = () => {
   );
 };
 
-const S9 = () => {
-  const f = useCurrentFrame();
+// No trans fats: a gold check draws itself, the reason in plain words.
+const CheckArt: React.FC = () => {
+  const g = useLine(GOLD, 10);
   return (
-    <>
-      <Overline top={300}>Холодный отжим</Overline>
-      <Head top={H} size={110} lines={['Не содержит', 'трансжиров']} />
-      <Figure top={700} size={200} at={18} color="#B9AFA4">
-        <Count to={200} at={20} dur={26} /> °C
-      </Figure>
-      <Sub top={910} at={34} lines={['при рафинации паром', 'в масле образуются трансжиры']} />
-      <div style={{position: 'absolute', top: 1080, left: LEFT, width: (1080 - LEFT * 2) * ramp(f, 54, 74), height: 2, background: 'rgba(38,23,13,0.1)'}} />
-      <Figure top={1130} size={200} at={64}>
-        <Count to={30} at={66} dur={20} /> °C
-      </Figure>
-      <Sub top={1340} at={80} lines={['при холодном отжиме', 'они не образуются']} />
-      <Sfx name="tap" at={6} gain={0.5} />
-      <Sfx name="clink" at={86} gain={0.7} />
-    </>
+    <g>
+      <Glow cx={540} cy={930} r={300} opacity={0.7} />
+      <circle cx={540} cy={930} r={170} {...g} transform="rotate(-90 540 930)" />
+      <path d="M 462 934 L 520 992 L 626 872" {...g} />
+    </g>
   );
 };
 
-const S10 = () => {
-  const f = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const ph = spring({frame: f - 20, fps, config: {damping: 20, stiffness: 80}});
-  return (
-    <>
-      <Overline top={300}>Отжим только после заказа</Overline>
-      <Head top={H} lines={['От заказа до стола']} />
-      <Figure top={H + 110} size={230} at={14}>
-        <Count to={48} at={16} dur={26} /> часов
-      </Figure>
-      {/* full photo, uncropped, flush with the sides and the bottom; it slides up into place */}
-      <div style={{position: 'absolute', left: 0, bottom: 0, width: 1080, height: 810, overflow: 'hidden', transform: `translateY(${(1 - ph) * 240}px)`, opacity: Math.min(1, ph * 1.5)}}>
-        <Img src={staticFile('photo/nabor2.jpg')} style={{width: 1080, height: 810, transform: `scale(${1.06 - 0.06 * ramp(f, 20, 100, Easing.linear)})`}} />
-      </div>
-      <div style={{position: 'absolute', left: 0, right: 0, top: 1110, height: 140, background: 'linear-gradient(#FFFFFF, rgba(255,255,255,0))'}} />
-      <Sfx name="tap" at={6} gain={0.5} />
-      <Sfx name="clink" at={42} gain={0.7} />
-    </>
-  );
-};
+const S9 = () => (
+  <>
+    <Overline top={300}>Холодный отжим</Overline>
+    <Head top={H} size={110} lines={['Не содержит', 'трансжиров']} />
+    <Draw at={18} dur={34}>
+      <Svg>
+        <CheckArt />
+      </Svg>
+    </Draw>
+    <Sub top={1180} size={54} at={44} lines={['Они появляются, когда масло', 'сильно нагревают.', 'Холодный отжим идёт', 'без нагрева, поэтому', 'трансжиров в масле нет']} />
+    <Sfx name="tap" at={6} gain={0.5} />
+  </>
+);
 
 const RANGE = ['almond', 'camelina', 'sun', 'thistle', 'pumpkin'];
-const S11 = () => (
+const S10 = () => (
   <>
-    <Sub top={300} size={52} at={4} lines={['Заказывайте на']} />
+    <Sub top={300} size={52} at={4} lines={['Заказывайте масло на']} />
     <Head top={370} size={120} at={10} lines={['maslarada.ru']} />
     <Svg>
       <Glow cx={540} cy={1060} r={520} />
@@ -552,9 +535,68 @@ const S11 = () => (
       <Bottle key={oil} oil={oil} x={140 + i * 200} bottom={1370} height={640} at={22 + Math.abs(i - 2) * 6} />
     ))}
     <Sub top={1430} size={50} at={52} lines={['10 сыродавленных масел', 'из разных культур']} />
-    <Sfx name="chord" at={12} gain={0.8} />
+    <Sfx name="tap" at={10} gain={0.5} />
+    <Sfx name="thud" at={26} gain={0.5} />
   </>
 );
+
+// From order to table: the figure counts up while the path order -> pressing -> at your door draws.
+const STAGES = ['заказ', 'отжим', 'у вас'];
+const Path48: React.FC = () => {
+  const f = useCurrentFrame();
+  const x0 = LEFT + 14;
+  const x1 = 1080 - LEFT - 14;
+  const line = ramp(f, 30, 76, Easing.bezier(0.45, 0, 0.2, 1));
+  return (
+    <>
+      <svg width={1080} height={160} viewBox="0 0 1080 160" style={{position: 'absolute', left: 0, top: 760}}>
+        <line x1={x0} y1={30} x2={x1} y2={30} stroke="rgba(38,23,13,0.12)" strokeWidth={4} strokeLinecap="round" />
+        <line x1={x0} y1={30} x2={x0 + (x1 - x0) * line} y2={30} stroke={GOLD} strokeWidth={6} strokeLinecap="round" />
+        {STAGES.map((_, i) => {
+          const x = x0 + ((x1 - x0) * i) / 2;
+          const on = ramp(f, 30 + i * 22, 38 + i * 22);
+          return <circle key={i} cx={x} cy={30} r={10 + 6 * on} fill={on > 0.5 ? GOLD : '#FFFFFF'} stroke={GOLD} strokeWidth={4} />;
+        })}
+      </svg>
+      {STAGES.map((label, i) => {
+        const x = x0 + ((x1 - x0) * i) / 2;
+        const on = ramp(f, 32 + i * 22, 46 + i * 22);
+        const align = i === 0 ? 'left' : i === 2 ? 'right' : 'center';
+        const left = i === 0 ? x - 16 : i === 2 ? x - 300 + 16 : x - 150;
+        return (
+          <div key={label} style={{position: 'absolute', top: 820, left, width: 300, textAlign: align, fontFamily: FONT.medium, fontSize: 44, color: COLORS.ink, opacity: on, transform: `translateY(${(1 - on) * 14}px)`}}>
+            {label}
+          </div>
+        );
+      })}
+      {STAGES.map((_, i) => (
+        <Sfx key={i} name="tick" at={30 + i * 22} gain={0.8} />
+      ))}
+    </>
+  );
+};
+
+const S11 = () => {
+  const f = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const ph = spring({frame: f - 40, fps, config: {damping: 20, stiffness: 80}});
+  return (
+    <>
+      <Overline top={300}>Отжим только после заказа</Overline>
+      <Head top={H} lines={['От заказа до стола']} />
+      <Figure top={H + 110} size={230} at={14}>
+        <Count to={48} at={16} dur={50} /> часов
+      </Figure>
+      <Path48 />
+      {/* full photo, uncropped, flush with the sides and the bottom; it slides up into place */}
+      <div style={{position: 'absolute', left: 0, bottom: 0, width: 1080, height: 810, overflow: 'hidden', transform: `translateY(${(1 - ph) * 300}px)`, opacity: Math.min(1, ph * 1.5)}}>
+        <Img src={staticFile('photo/nabor2.jpg')} style={{width: 1080, height: 810, transform: `scale(${1.06 - 0.06 * ramp(f, 40, 140, Easing.linear)})`}} />
+      </div>
+      <div style={{position: 'absolute', left: 0, right: 0, top: 1110, height: 140, background: 'linear-gradient(#FFFFFF, rgba(255,255,255,0))', opacity: Math.min(1, ph * 1.5)}} />
+      <Sfx name="tap" at={6} gain={0.5} />
+    </>
+  );
+};
 
 type Scene = {C: React.FC; theme: Theme; dur: number};
 const SCENES: Scene[] = [
@@ -570,9 +612,9 @@ const SCENES: Scene[] = [
   {C: S8, theme: LIGHT, dur: 125},
   {C: S8b, theme: LIGHT, dur: 125},
   {C: S8c, theme: LIGHT, dur: 110},
-  {C: S9, theme: LIGHT, dur: 140},
-  {C: S10, theme: LIGHT, dur: 105},
-  {C: S11, theme: LIGHT, dur: 130},
+  {C: S9, theme: LIGHT, dur: 150},
+  {C: S10, theme: LIGHT, dur: 120},
+  {C: S11, theme: LIGHT, dur: 150},
 ];
 
 // During a transition the background stays put (no dark bars): only the content lifts and fades.
